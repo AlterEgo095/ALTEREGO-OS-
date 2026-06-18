@@ -1,0 +1,20 @@
+name: engineering
+description: Software engineering operations (GitHub, code analysis, fixes, tests, PRs)
+capabilities:
+  - github
+  - docker
+  - filesystem
+  - ssh
+  - llm.chat
+subscribes:
+  - mission.created
+  - build.failed
+  - pr.review_requested
+publishes:
+  - pr.created
+  - build.passed
+  - build.failed
+roles:
+  - architect
+  - coder
+  - reviewer

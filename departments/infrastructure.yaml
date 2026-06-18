@@ -1,0 +1,20 @@
+name: infrastructure
+description: Infrastructure operations (VPS, Docker, deployments, monitoring, backups)
+capabilities:
+  - ssh
+  - docker
+  - filesystem
+  - llm.chat
+subscribes:
+  - mission.created
+  - server.down
+  - disk.critical
+  - cpu.critical
+publishes:
+  - server.health_checked
+  - deployment.completed
+  - backup.done
+roles:
+  - devops
+  - monitor
+  - healer

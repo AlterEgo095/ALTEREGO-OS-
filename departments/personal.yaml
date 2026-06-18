@@ -1,0 +1,19 @@
+name: personal
+description: Personal operations (calendar, communications, documents, preferences)
+capabilities:
+  - email
+  - telegram
+  - filesystem
+  - llm.chat
+subscribes:
+  - mission.created
+  - email.received
+  - message.received
+publishes:
+  - notification.sent
+  - document.drafted
+  - reminder.scheduled
+roles:
+  - assistant
+  - communicator
+  - organizer

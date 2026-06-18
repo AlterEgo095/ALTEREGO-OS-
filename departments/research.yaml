@@ -1,0 +1,16 @@
+name: research
+description: Research and information gathering (web, PDFs, knowledge synthesis)
+capabilities:
+  - browser
+  - filesystem
+  - llm.chat
+subscribes:
+  - mission.created
+  - document.received
+publishes:
+  - research.report_ready
+  - knowledge.updated
+roles:
+  - researcher
+  - summarizer
+  - fact_checker
