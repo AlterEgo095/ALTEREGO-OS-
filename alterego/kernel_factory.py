@@ -23,30 +23,29 @@ def build_kernel(
 ) -> dict:
     """Build and wire the full V1.1 kernel.
 
-    Returns a dict with all components for programmatic access:
-        {
-            "chief_of_staff": ChiefOfStaff,
-            "mission_engine": MissionEngine,
-            "memory": Memory,
-            "event_bus": EventBus,
-            "plugin_manager": PluginManager,
-            "capability_registry": CapabilityRegistry,
-            "policy_engine": PolicyEngine,
-            "confidence_engine": ConfidenceEngine,
-            "learning_engine": LearningEngine,
-            "department_loader": DepartmentLoader,
-        }
+    Returns a dict with all components for programmatic access.
+    Note: plugins are discovered but NOT initialized (async). Call
+    `await kernel['plugin_manager'].initialize_all()` separately if needed.
     """
-    import asyncio
-
     # 1. Infra
     memory = SQLiteMemory(db_path)
     bus = InProcessEventBus()
 
-    # 2. Plugins
+    # 2. Plugins (discovery is sync, initialization is async)
     pm = PluginManager()
     pm.discover()
-    asyncio.run(pm.initialize_all())
+
+    # If no plugins discovered via entry points (not pip-installed),
+    # manually register the core plugins
+    if not pm.list_plugins():
+        from alterego.plugins.filesystem import FilesystemPlugin
+        from alterego.plugins.llm import LLMPlugin
+        fs = FilesystemPlugin()
+        llm = LLMPlugin()
+        pm._plugins["filesystem"] = fs
+        pm._plugins["llm"] = llm
+        pm._by_capability["filesystem"] = ["filesystem"]
+        pm._by_capability["llm.chat"] = ["llm"]
 
     # 3. Capabilities
     cap_reg = CapabilityRegistry()
