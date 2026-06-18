@@ -172,6 +172,48 @@ def feedback(mission_id: str, rating: int, comment: str = ""):
     console.print(f"[green]✓ Feedback recorded for mission {mission_id} (rating={rating})[/green]")
 
 
+@app.command()
+def engineer(
+    repo: str = typer.Argument(..., help="GitHub repo to analyze (owner/name)"),
+    issue: str = typer.Option("", "--issue", "-i", help="Description of what to fix"),
+    skip_approval: bool = typer.Option(False, "--skip-approval", help="DANGEROUS: skip human gate (testing only)"),
+    no_test: bool = typer.Option(False, "--no-test", help="Skip running tests"),
+):
+    """Run the Software Engineering pipeline on a GitHub repo.
+
+    Pipeline: Clone → Branch → Analyze → Fix → Test → Diff → Human Approval → Commit → PR
+
+    ⚠ NO commits or PRs without explicit human approval.
+    """
+    from alterego.engineering import SoftwareEngineeringDepartment, HumanApprovalGate
+
+    kernel = build_kernel()
+    llm = kernel.get("llm_plugin")
+    github = kernel["plugin_manager"].best_for("github")
+    fs = kernel["plugin_manager"].best_for("filesystem")
+
+    dept = SoftwareEngineeringDepartment(
+        llm_plugin=llm,
+        github_plugin=github,
+        filesystem_plugin=fs,
+        approval_gate=HumanApprovalGate(interactive=not skip_approval),
+    )
+
+    console.print(f"[bold blue]ALTEREGO — Software Engineering Department[/bold blue]")
+    console.print(f"Repo: {repo}")
+    console.print(f"Issue: {issue or '(general analysis)'}")
+    console.print()
+
+    report = asyncio.run(dept.run(
+        repo=repo,
+        issue_description=issue,
+        auto_test=not no_test,
+        skip_approval=skip_approval,
+    ))
+
+    console.print(Panel(report.summary(), title="Engineering Report", border_style="blue"))
+
+
 def main() -> None:
     app()
 

@@ -1,0 +1,27 @@
+{
+  "scenario": "3B \u2014 Software Engineering Department",
+  "passed": true,
+  "criteria": {
+    "code_analyzed": true,
+    "issues_found": true,
+    "fixes_proposed": true,
+    "diff_generated": true,
+    "human_gate_present": true,
+    "no_auto_commit": true,
+    "no_pr_without_approval": true,
+    "cleanup_on_reject": true
+  },
+  "report": {
+    "repo": "alterego-os (local)",
+    "branch": "alterego/fix-test",
+    "files_analyzed": 68,
+    "issues_found": 5,
+    "fixes_proposed": 0,
+    "tests_run": true,
+    "tests_passed": false,
+    "files_changed": 0,
+    "approval": "rejected",
+    "pr_created": false,
+    "elapsed_sec": 2.4
+  }
+}
