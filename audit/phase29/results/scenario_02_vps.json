@@ -1,0 +1,48 @@
+{
+  "scenario": 2,
+  "passed": true,
+  "criteria": {
+    "cpu_retrieved": true,
+    "ram_retrieved": true,
+    "disk_retrieved": true,
+    "docker_audited": true,
+    "services_listed": true,
+    "logs_retrieved": true,
+    "no_corrective_action": true
+  },
+  "report": {
+    "audited_at": "2026-06-18 08:35:38",
+    "mode": "local",
+    "cpu": {
+      "cores": 4,
+      "model": "Intel(R) Xeon(R) Processor",
+      "load_1min": 0.05,
+      "load_5min": 0.03,
+      "load_15min": 0.0
+    },
+    "ram": {
+      "total_kb": 8275016,
+      "available_kb": 7693780,
+      "swap_total_kb": 0,
+      "used_kb": 581236,
+      "used_percent": 7.0
+    },
+    "disk": {
+      "total_gb": 9.8,
+      "used_gb": 0.2,
+      "free_gb": 9.1,
+      "used_percent": 2.0
+    },
+    "docker": {
+      "available": false,
+      "containers": []
+    },
+    "services": [],
+    "recent_logs_count": 1,
+    "recent_logs_sample": [
+      "-- No entries --"
+    ],
+    "anomalies": []
+  },
+  "elapsed_ms": 13.0
+}

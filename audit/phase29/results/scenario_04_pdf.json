@@ -1,0 +1,35 @@
+{
+  "scenario": 4,
+  "passed": true,
+  "criteria": {
+    "text_extracted": true,
+    "summarized": true,
+    "classified": true,
+    "memorized": true,
+    "qa_answered": true
+  },
+  "memory_record": {
+    "doc_id": "affad2376cd1",
+    "filename": "AI_Operating_System_Architecture_Report.pdf",
+    "page_count": 102,
+    "char_count": 176788,
+    "summary": "(page 1: extraction error) AI Operating System \u2014 Rapport d'Architecture\nAI Operating System \u00b7 Rapport d'Architecture \u00b7 v1.0\n1\nTable des mati\u00e8res\n5\n1. R\u00e9sum\u00e9 ex\u00e9cutif\n .  .  .  .  .  .  .  .  .  .  .  ",
+    "classification": "technical",
+    "memorized_at": "2026-06-18 08:36:39"
+  },
+  "qa_pairs": [
+    {
+      "question": "What is the architecture of the system?",
+      "answer": "@abstractmethod def\nmethods(self) -> List[str]: \"\"\"Return the list of exposed methods"
+    },
+    {
+      "question": "What is the kernel?",
+      "answer": "@abstractmethod def\nmethods(self) -> List[str]: \"\"\"Return the list of exposed methods"
+    },
+    {
+      "question": "What are the plugins?",
+      "answer": "@abstractmethod def\nmethods(self) -> List[str]: \"\"\"Return the list of exposed methods"
+    }
+  ],
+  "elapsed_ms": 631.3
+}

@@ -1,0 +1,23 @@
+{
+  "scenario": 5,
+  "passed": true,
+  "results": [
+    {
+      "url": "https://example.com",
+      "passed": true,
+      "criteria": {
+        "fetched": true,
+        "title_extracted": true,
+        "text_extracted": true,
+        "links_found": true,
+        "cited_source": true,
+        "archived": true
+      },
+      "title": "Example Domain",
+      "text_length": 142,
+      "links_count": 1,
+      "archive_hash": "ff67a9d764d6a236",
+      "elapsed_ms": 53.6
+    }
+  ]
+}

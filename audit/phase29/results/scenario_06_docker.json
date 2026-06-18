@@ -1,0 +1,6 @@
+{
+  "scenario": 6,
+  "passed": null,
+  "reason": "docker-py not installed (pip install docker)",
+  "criteria": {}
+}

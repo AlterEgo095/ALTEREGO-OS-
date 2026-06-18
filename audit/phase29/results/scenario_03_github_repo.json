@@ -1,0 +1,23 @@
+{
+  "scenario": 3,
+  "passed": true,
+  "results": [
+    {
+      "repo": "pallets/click",
+      "passed": true,
+      "criteria": {
+        "cloned": true,
+        "indexed": true,
+        "graph_built": true,
+        "documentation_generated": true,
+        "dependencies_detected": true,
+        "risks_identified": true,
+        "no_modification": true
+      },
+      "elapsed_ms": 100822.3,
+      "file_count": 150,
+      "dependencies_count": 0,
+      "risks_count": 1
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "scenario": 7,
+  "passed": true,
+  "criteria": {
+    "100_conversations_recovered": true,
+    "alice_conversations_correct": true,
+    "bob_conversations_correct": true,
+    "topic_filter_works": true,
+    "5_preferences_recovered": true,
+    "alice_preferences_correct": true,
+    "10_missions_recovered": true,
+    "completed_missions_correct": true,
+    "all_conv_ids_recovered": true,
+    "all_pref_ids_recovered": true,
+    "all_mission_ids_recovered": true
+  },
+  "created": {
+    "conversations_created": 100,
+    "preferences_created": 5,
+    "missions_created": 10
+  },
+  "verified": {
+    "conversations_total": 100,
+    "conversations_alice": 50,
+    "conversations_bob": 50,
+    "conversations_topic_0": 10,
+    "preferences_total": 5,
+    "preferences_alice": 3,
+    "missions_total": 10,
+    "missions_completed": 7,
+    "conversations_recovered_by_id": 100,
+    "preferences_recovered_by_id": 5,
+    "missions_recovered_by_id": 10
+  }
+}

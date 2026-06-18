@@ -1,0 +1,49 @@
+{
+  "scenario": 8,
+  "passed": true,
+  "criteria": {
+    "95pct_tasks_completed_without_intervention": true,
+    "0_memory_corruption": true,
+    "0_kernel_crashes": true,
+    "0_architecture_leak": true,
+    "0_event_loss": true,
+    "0_secret_leak": true,
+    "memory_growth_reasonable": true,
+    "latency_stable": true
+  },
+  "report": {
+    "missions_total": 1000,
+    "missions_succeeded": 1000,
+    "missions_failed": 0,
+    "kernel_crashes": 0,
+    "elapsed_sec": 30.74,
+    "throughput_per_sec": 32.5,
+    "latency_avg_ms": 30.73,
+    "latency_p95_ms": 54.32,
+    "latency_p99_ms": 61.46,
+    "latency_max_ms": 72.09,
+    "peak_ram_mb": 4.48,
+    "memory_growth_checkpoints": [
+      {
+        "at_mission": 250,
+        "ram_growth_mb": 0.11
+      },
+      {
+        "at_mission": 500,
+        "ram_growth_mb": 0.16
+      },
+      {
+        "at_mission": 750,
+        "ram_growth_mb": 0.19
+      },
+      {
+        "at_mission": 1000,
+        "ram_growth_mb": 0.25
+      }
+    ],
+    "conversations_in_memory": 2000,
+    "tasks_in_memory": 1000,
+    "memory_corruption": false
+  },
+  "note": "Simulated continuous run. For real 7-day test, run via cron hourly for 168h."
+}
