@@ -9,6 +9,7 @@ of available capabilities from the CapabilityRegistry.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Optional
 
 from loguru import logger
@@ -30,37 +31,45 @@ class Task(BaseModel):
 class Planner:
     """Plans missions by decomposing objectives into tasks.
 
-    V1 strategy:
-      1. If the objective is a no-op (no external capability needed), return a single
-         LLM task that answers directly.
-      2. Otherwise, ask the LLM to produce a JSON plan using the available capabilities.
+    V1.1 strategy:
+      1. Ask the LLM to produce a JSON plan using the available capabilities.
+      2. Strict JSON parsing with markdown fence stripping.
+      3. Fallback to single llm.chat task if LLM fails or produces invalid JSON.
     """
 
-    PLANNER_PROMPT = """You are the Planner of ALTEREGO OS, an AI Operating System.
-Given a user objective and the list of available capabilities, produce a JSON plan.
+    PLANNER_PROMPT = """You are a JSON-only task planner. You decompose user requests into executable task sequences. You NEVER explain, NEVER use markdown, NEVER write prose. You output ONLY a JSON object.
 
-Available capabilities:
+Available capabilities and their methods:
 {capabilities}
 
-Output STRICT JSON in this exact format (no markdown, no explanation):
-{{
-  "tasks": [
-    {{
-      "step": 1,
-      "description": "what to do",
-      "capability": "one of the capabilities above",
-      "method": "method name (e.g. clone, chat, exec, query)",
-      "params": {{}}
-    }}
-  ]
-}}
+Method reference:
+- filesystem: read(path), write(path, content), append(path, content), list(path), glob(pattern, path), exists(path), mkdir(path), copy(src, dest), move(src, dest), delete(path), info(path)
+- llm.chat: chat(user, system)
+- github: clone(repo, dest), list_repos(owner, limit), get_repo_info(repo), create_issue(repo, title, body), create_pull_request(repo, title, head, base, body), list_commits(repo, limit)
+- docker: ps(all), logs(container, tail), restart(container), stop(container), start(container), build(path, tag), exec(container, cmd), stats(container)
+- ssh: exec(host, user, command, port, key_path), scp_put(host, user, local, remote), scp_get(host, user, remote, local), health_check(host, user, port, key_path)
+- browser: open(url), click(selector), fill(selector, value), screenshot(path, full_page), scrape(selector), evaluate(script)
+- database.sql: query(sql, args), execute(sql, args)
+- database.nosql: find(collection, filter, limit), find_one(collection, filter), insert(collection, document), update(collection, filter, set), delete(collection, filter), count(collection, filter)
+- email: send(to, subject, body, html)
+- telegram: send_message(chat_id, text, parse_mode), send_document(chat_id, document_path)
+
+You MUST respond with ONLY this JSON structure and nothing else:
+{{"tasks":[{{"step":1,"description":"short description","capability":"capability_name","method":"method_name","params":{{"key":"value"}}}}]}}
 
 Rules:
-- Each task MUST use one of the listed capabilities.
-- Keep plans short (3-6 tasks max for V1).
-- The `params` dict must contain concrete values (no placeholders).
-- If the objective is purely conversational (just answer a question), use one task with capability=llm.chat.
-"""
+- ONLY output JSON. No text before or after. No markdown fences.
+- Use ONLY the capabilities listed above.
+- Use concrete parameter values (no placeholders).
+- Maximum 5 tasks.
+- For simple greetings/questions: ONE task with capability="llm.chat", method="chat".
+- For file operations: use "filesystem" capability with concrete paths.
+- End with an llm.chat task to respond to the user."""
+
+    # Suffix appended to the user message to force JSON output
+    JSON_SUFFIX = """
+
+Respond with ONLY the JSON task plan. No explanation. No markdown. Start with { and end with }."""
 
     def __init__(self, capability_registry: CapabilityRegistry, llm_plugin: Any) -> None:
         self.capability_registry = capability_registry
@@ -70,7 +79,7 @@ Rules:
         """Produce a list of tasks for the given mission."""
         caps_description = self.capability_registry.describe() or "(no capabilities registered)"
         prompt = self.PLANNER_PROMPT.format(capabilities=caps_description)
-        user_msg = f"Objective: {mission.objective}"
+        user_msg = mission.objective + self.JSON_SUFFIX
 
         logger.info(f"planning mission {mission.id}: {mission.objective[:80]}")
 
@@ -79,76 +88,116 @@ Rules:
             raw = await self.llm_plugin.call("chat", {
                 "system": prompt,
                 "user": user_msg,
-                "temperature": 0.2,
+                "temperature": 0.1,  # very low temperature for structured output
             })
         except Exception as e:
             logger.error(f"planner LLM call failed: {e}")
-            # Fallback: single LLM task that answers directly
-            return [Task(
-                step=1,
-                description="Answer the user directly (fallback after planner failure)",
-                capability="llm.chat",
-                method="chat",
-                params={"system": "You are a helpful assistant.", "user": mission.objective},
-            )]
+            return self._fallback(mission.objective)
 
         # Parse the JSON plan
         plan = self._parse_plan(raw)
         if not plan:
             logger.warning("planner produced empty/invalid plan; fallback to direct LLM")
-            return [Task(
-                step=1,
-                description="Answer the user directly",
-                capability="llm.chat",
-                method="chat",
-                params={"system": "You are a helpful assistant.", "user": mission.objective},
-            )]
+            return self._fallback(mission.objective)
 
         return plan
+
+    def _fallback(self, objective: str) -> list[Task]:
+        """Fallback: single LLM task that answers directly."""
+        return [Task(
+            step=1,
+            description="Answer the user directly",
+            capability="llm.chat",
+            method="chat",
+            params={"system": "You are ALTEREGO, a digital brain and personal assistant. Be helpful and concise.", "user": objective},
+        )]
 
     def _parse_plan(self, raw: Any) -> Optional[list[Task]]:
         """Parse the LLM output into a list of Task. Returns None on failure.
 
         Handles multiple response formats:
         - {"content": '{"tasks": [...]}'}  (LLM plugin wraps in content)
+        - {"content": "```json\\n{...}\\n```"}  (markdown-fenced JSON)
         - {"tasks": [...]}                 (direct dict)
         - '{"tasks": [...]}'               (raw JSON string)
+        - '```json\\n{...}\\n```'           (markdown-fenced string)
         """
-        # Extract the actual content if wrapped in {"content": ...}
+        # Step 1: Extract content string from possible wrapper
+        content_str: Optional[str] = None
+        tasks_data: Optional[list] = None
+
         if isinstance(raw, dict):
             if "tasks" in raw:
                 tasks_data = raw["tasks"]
             elif "content" in raw:
-                # LLM plugin returns {"content": "..."} — content may be JSON string
                 content = raw["content"]
                 if isinstance(content, str):
-                    raw = content  # fall through to string parsing
+                    content_str = content
                 elif isinstance(content, dict) and "tasks" in content:
                     tasks_data = content["tasks"]
                 else:
                     return None
             else:
                 return None
+        elif isinstance(raw, str):
+            content_str = raw
         else:
-            raw = str(raw) if raw else ""
+            return None
 
-        if isinstance(raw, str):
+        # Step 2: If we have a string, strip markdown fences and parse JSON
+        if content_str is not None and tasks_data is None:
+            # Strip markdown code fences (```json ... ``` or ``` ... ```)
+            content_str = content_str.strip()
+            fence_pattern = r"```(?:json)?\s*\n?(.*?)\n?```"
+            fence_match = re.search(fence_pattern, content_str, re.DOTALL)
+            if fence_match:
+                content_str = fence_match.group(1).strip()
+
+            # Try direct JSON parse
             try:
-                tasks_data = json.loads(raw).get("tasks", [])
+                parsed = json.loads(content_str)
+                tasks_data = parsed.get("tasks", [])
             except json.JSONDecodeError:
-                start = raw.find("{")
-                end = raw.rfind("}") + 1
+                # Try to extract JSON object from the string
+                start = content_str.find("{")
+                end = content_str.rfind("}") + 1
                 if start >= 0 and end > start:
                     try:
-                        tasks_data = json.loads(raw[start:end]).get("tasks", [])
+                        parsed = json.loads(content_str[start:end])
+                        tasks_data = parsed.get("tasks", [])
                     except json.JSONDecodeError:
-                        return None
+                        # Last resort: try to find "tasks" array directly
+                        try:
+                            tasks_match = re.search(r'"tasks"\s*:\s*\[', content_str)
+                            if tasks_match:
+                                arr_start = tasks_match.end() - 1
+                                # Find matching closing bracket
+                                depth = 0
+                                for i in range(arr_start, len(content_str)):
+                                    if content_str[i] == '[':
+                                        depth += 1
+                                    elif content_str[i] == ']':
+                                        depth -= 1
+                                        if depth == 0:
+                                            tasks_json = content_str[arr_start:i+1]
+                                            tasks_data = json.loads(tasks_json)
+                                            break
+                        except (json.JSONDecodeError, Exception):
+                            return None
+                        if tasks_data is None:
+                            return None
                 else:
                     return None
 
+        if not tasks_data:
+            return None
+
+        # Step 3: Convert to Task objects
         tasks = []
         for i, t in enumerate(tasks_data, start=1):
             try:
+                if not isinstance(t, dict):
+                    continue
                 tasks.append(Task(
                     step=t.get("step", i),
                     description=t.get("description", ""),

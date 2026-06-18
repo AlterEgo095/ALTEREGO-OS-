@@ -87,44 +87,82 @@ class LLMPlugin(BasePlugin):
         max_tokens: int | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        """Send a chat completion request via HTTP."""
-        if not self._client:
-            raise RuntimeError("LLM plugin not initialized")
+        """Send a chat completion request.
 
-        payload: dict[str, Any] = {
-            "model": self._model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "temperature": temperature,
-        }
-        if max_tokens:
-            payload["max_tokens"] = max_tokens
+        Tries HTTP first, falls back to z-ai CLI if HTTP fails.
+        """
+        # Try HTTP first
+        if self._client:
+            payload: dict[str, Any] = {
+                "model": self._model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                "temperature": temperature,
+            }
+            if max_tokens:
+                payload["max_tokens"] = max_tokens
 
+            try:
+                resp = await self._client.post("/chat/completions", json=payload)
+                resp.raise_for_status()
+                data = resp.json()
+                content = data["choices"][0]["message"]["content"]
+                usage = data.get("usage", {})
+                return {
+                    "content": content,
+                    "model": data.get("model", self._model),
+                    "usage": {
+                        "prompt_tokens": usage.get("prompt_tokens", 0),
+                        "completion_tokens": usage.get("completion_tokens", 0),
+                    },
+                }
+            except Exception as e:
+                logger.warning(f"LLM HTTP failed ({e}), trying z-ai CLI fallback...")
+
+        # Fallback: call z-ai CLI directly via subprocess
+        return await self._chat_via_cli(user, system)
+
+    async def _chat_via_cli(self, user: str, system: str) -> dict[str, Any]:
+        """Call z-ai chat CLI as fallback LLM provider."""
+        import asyncio
+        import tempfile
+        import json as json_mod
+        import os
+
+        tmp_file = tempfile.mktemp(suffix=".json")
         try:
-            resp = await self._client.post("/chat/completions", json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-            content = data["choices"][0]["message"]["content"]
+            # Build the prompt — combine system + user into the prompt
+            combined = f"[System: {system}]\n\n{user}"
+            proc = await asyncio.create_subprocess_exec(
+                "z-ai", "chat", "--prompt", combined, "-o", tmp_file,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+
+            if proc.returncode != 0:
+                raise RuntimeError(f"z-ai CLI failed: {stderr.decode()[:200]}")
+
+            with open(tmp_file) as f:
+                data = json_mod.load(f)
+
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
             usage = data.get("usage", {})
             return {
                 "content": content,
-                "model": data.get("model", self._model),
+                "model": data.get("model", "z-ai-cli"),
                 "usage": {
                     "prompt_tokens": usage.get("prompt_tokens", 0),
                     "completion_tokens": usage.get("completion_tokens", 0),
                 },
             }
-        except httpx.HTTPStatusError as e:
-            logger.error(f"LLM HTTP error: {e.response.status_code} — {e.response.text[:200]}")
-            raise RuntimeError(f"LLM API error {e.response.status_code}: {e.response.text[:200]}")
-        except httpx.ConnectError as e:
-            logger.error(f"LLM connection error: {e}")
-            raise RuntimeError(f"Cannot connect to LLM at {self._base_url}. Is Ollama running? (ollama serve)")
-        except Exception as e:
-            logger.error(f"LLM error: {e}")
-            raise
+        except asyncio.TimeoutError:
+            raise RuntimeError("z-ai CLI timed out (120s)")
+        finally:
+            if os.path.exists(tmp_file):
+                os.unlink(tmp_file)
 
     async def _embed(self, text: str, **kwargs: Any) -> list[float]:
         if not self._client:

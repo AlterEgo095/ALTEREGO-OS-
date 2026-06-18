@@ -3,9 +3,12 @@
 The Decision Engine sits between the Mission Engine and the Planner. It:
   1. Analyzes the mission objective (extract intent, context).
   2. Pulls relevant context from Memory (conversations, projects, ...).
-  3. Forwards to the Planner with the enriched context.
+  3. Forwards to the Planner with the ORIGINAL objective (not enriched).
 
-V1 keeps it simple: a single LLM call to extract intent, then delegate to Planner.
+V1.1: The Planner receives the raw user objective — not the enriched version.
+The intent and context are logged for debugging but NOT injected into the
+planner prompt (they confuse the LLM into answering conversationally instead
+of producing JSON).
 """
 from __future__ import annotations
 
@@ -39,8 +42,14 @@ Output ONLY the intent (one sentence, no preamble, no quotes)."""
         self.llm_plugin = llm_plugin
 
     async def analyze_and_plan(self, mission: Mission) -> list[Task]:
-        """Analyze the mission, enrich context, then produce a plan."""
-        # 1. Extract intent (helps the Planner produce a better plan)
+        """Analyze the mission, then produce a plan.
+
+        V1.1: The Planner receives the ORIGINAL user objective, not an
+        enriched version. The intent extraction is logged but NOT passed
+        to the Planner (it was confusing the LLM into answering
+        conversationally instead of producing JSON).
+        """
+        # 1. Extract intent (for logging/debugging only — NOT passed to Planner)
         try:
             intent = await self.llm_plugin.call("chat", {
                 "system": self.INTENT_PROMPT,
@@ -49,22 +58,18 @@ Output ONLY the intent (one sentence, no preamble, no quotes)."""
             })
             if isinstance(intent, dict):
                 intent = intent.get("content", str(intent))
-            logger.info(f"mission {mission.id} intent: {intent}")
+            logger.info(f"mission {mission.id} intent: {str(intent)[:100]}")
         except Exception as e:
             logger.warning(f"intent extraction failed ({e}); using raw objective")
             intent = mission.objective
 
-        # 2. Pull recent conversations from memory (V1: simple context)
+        # 2. Pull recent conversations from memory (for logging only)
         recent = await self.memory.query("conversations", user_id=mission.user_id)
-        context_lines = [f"- {r.data.get('summary', r.data.get('objective', '?'))}" for r in recent[-3:]]
-        context = "\n".join(context_lines) if context_lines else "(no prior context)"
+        if recent:
+            logger.debug(f"mission {mission.id} has {len(recent)} prior conversations in context")
 
-        # 3. Enrich the mission objective with intent + context, then plan
-        enriched = f"Intent: {intent}\n\nPrior context:\n{context}\n\nOriginal objective: {mission.objective}"
-        mission.objective = enriched
-        mission.touch()
-
-        # 4. Plan
+        # 3. Plan — pass the ORIGINAL objective to the Planner
+        # Do NOT enrich mission.objective — the Planner needs the raw user text
         plan = await self.planner.plan(mission)
         logger.info(f"mission {mission.id} plan: {len(plan)} tasks")
         return plan

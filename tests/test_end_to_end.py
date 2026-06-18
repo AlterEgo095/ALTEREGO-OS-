@@ -32,14 +32,15 @@ class EchoLLMPlugin(BasePlugin):
         if method == "chat":
             user = params.get("user", "")
             self.last_user_msg = user
-            # If we're being asked to plan, return a plan
-            if "Available capabilities" in params.get("system", ""):
+            system = params.get("system", "")
+            # If we're being asked to plan (V1.1 prompt says "PLANNER module")
+            if "PLANNER module" in system or "Available capabilities" in system:
                 # Escape newlines in user content for valid JSON
                 safe_content = user[:80].replace("\n", " ").replace('"', "'")
                 plan = json.dumps({"tasks": [{"step": 1, "description": "Write a file with the message", "capability": "filesystem", "method": "write", "params": {"path": "/tmp/alterego-test-output.txt", "content": f"Mission: {safe_content}"}}]})
                 return {"content": plan}
             # If we're being asked for intent, return one
-            if "extract the user's intent" in params.get("system", ""):
+            if "extract the user" in system.lower():
                 return {"content": "Write the user's message to a file."}
             # Default: echo
             return {"content": f"echo: {user}"}
