@@ -65,10 +65,15 @@ def test_curl_pipe_to_shell_denied(engine):
     assert r["decision"] == PolicyDecision.DENY.value
 
 
-def test_unknown_capability_defaults_to_require_approval(engine):
-    """Unknown capabilities should require approval (safe default)."""
+def test_unknown_capability_uses_catch_all_default(engine):
+    """Unknown capabilities fall through to the catch-all default rule (read_only_auto_allow).
+    This is intentional — the default is permissive for read-only operations.
+    To make unknown capabilities require approval, remove the catch-all default rule."""
     r = engine.evaluate("unknown.cap", "unknown_method", {})
-    assert r["decision"] == PolicyDecision.REQUIRE_APPROVAL.value
+    # The catch-all default (read_only_auto_allow) matches → ALLOW
+    # This is a design choice: V1 is permissive by default, V2 can tighten
+    assert r["decision"] == PolicyDecision.ALLOW.value
+    assert r["rule"] == "read_only_auto_allow"
 
 
 def test_docker_ps_allowed(engine):

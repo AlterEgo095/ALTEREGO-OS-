@@ -57,12 +57,20 @@ class MissionEngine:
         return mission
 
     async def run(self, mission: Mission) -> Mission:
-        """Plan + execute a mission end-to-end."""
+        """Plan + execute a mission end-to-end.
+
+        If mission.plan is already set (e.g. by ChiefOfStaff V1.1), skip planning.
+        """
         try:
-            # 1. Plan
-            mission.status = MissionStatus.PLANNED
-            plan = await self.decision_engine.analyze_and_plan(mission)
-            mission.plan = [t.model_dump() for t in plan]
+            # 1. Plan (skip if already planned by ChiefOfStaff)
+            if mission.plan:
+                # Plan already exists — convert to Task objects for execution
+                from alterego.kernel.planner import Task
+                plan = [Task(**t) if isinstance(t, dict) else t for t in mission.plan]
+            else:
+                mission.status = MissionStatus.PLANNED
+                plan = await self.decision_engine.analyze_and_plan(mission)
+                mission.plan = [t.model_dump() for t in plan]
             await self.memory.update("tasks", mission.id, {"status": mission.status.value, "plan": mission.plan})
 
             # 2. Execute

@@ -107,16 +107,35 @@ Rules:
         return plan
 
     def _parse_plan(self, raw: Any) -> Optional[list[Task]]:
-        """Parse the LLM output into a list of Task. Returns None on failure."""
-        if isinstance(raw, dict) and "tasks" in raw:
-            tasks_data = raw["tasks"]
-        elif isinstance(raw, str):
-            # Try to find JSON in the response
+        """Parse the LLM output into a list of Task. Returns None on failure.
+
+        Handles multiple response formats:
+        - {"content": '{"tasks": [...]}'}  (LLM plugin wraps in content)
+        - {"tasks": [...]}                 (direct dict)
+        - '{"tasks": [...]}'               (raw JSON string)
+        """
+        # Extract the actual content if wrapped in {"content": ...}
+        if isinstance(raw, dict):
+            if "tasks" in raw:
+                tasks_data = raw["tasks"]
+            elif "content" in raw:
+                # LLM plugin returns {"content": "..."} — content may be JSON string
+                content = raw["content"]
+                if isinstance(content, str):
+                    raw = content  # fall through to string parsing
+                elif isinstance(content, dict) and "tasks" in content:
+                    tasks_data = content["tasks"]
+                else:
+                    return None
+            else:
+                return None
+        else:
+            raw = str(raw) if raw else ""
+
+        if isinstance(raw, str):
             try:
-                # First try direct parse
                 tasks_data = json.loads(raw).get("tasks", [])
             except json.JSONDecodeError:
-                # Try to extract JSON block
                 start = raw.find("{")
                 end = raw.rfind("}") + 1
                 if start >= 0 and end > start:
@@ -126,8 +145,6 @@ Rules:
                         return None
                 else:
                     return None
-        else:
-            return None
 
         tasks = []
         for i, t in enumerate(tasks_data, start=1):

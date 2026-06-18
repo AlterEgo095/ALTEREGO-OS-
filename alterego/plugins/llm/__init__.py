@@ -2,6 +2,9 @@
 
 V1: uses OpenAI SDK directly (works for OpenAI API, Ollama via OpenAI-compat,
 LiteLLM if installed). V2 will switch to LiteLLM routing.
+
+The openai package is lazy-imported so the plugin can be registered even
+without the SDK installed — it will only fail at initialize() time.
 """
 from __future__ import annotations
 
@@ -9,7 +12,6 @@ import os
 from typing import Any
 
 from loguru import logger
-from openai import AsyncOpenAI
 
 from alterego.kernel.base import BasePlugin, BridgeSpec, PluginSpec
 
@@ -32,17 +34,23 @@ class LLMPlugin(BasePlugin):
     )
 
     def __init__(self) -> None:
-        self.client: AsyncOpenAI | None = None
+        self.client = None  # AsyncOpenAI instance (lazy)
         self.model: str = "gpt-4o-mini"
 
     async def initialize(self) -> None:
+        try:
+            from openai import AsyncOpenAI
+        except ImportError:
+            logger.error("LLM plugin: 'openai' package not installed. Run: pip install openai")
+            logger.error("LLM plugin: plugin will be non-functional until openai is installed")
+            return
+
         api_key = os.environ.get("OPENAI_API_KEY")
         base_url = os.environ.get("OPENAI_BASE_URL")
-        # If no OpenAI key, fall back to Ollama local
         if not api_key:
             ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
             base_url = f"{ollama_url}/v1"
-            api_key = "ollama"  # Ollama accepts any string
+            api_key = "ollama"
             self.model = os.environ.get("OLLAMA_MODEL", "llama3.2")
             logger.info(f"LLM plugin: using Ollama at {base_url} model={self.model}")
         else:

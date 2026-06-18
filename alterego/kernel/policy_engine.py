@@ -259,36 +259,52 @@ class PolicyEngine:
                     "forbidden_pattern": fp["pattern"],
                 }
 
-        # 2. Find matching rule (most specific first)
-        # Priority: capability+method > capability > default
-        matches = []
+        # 2. Find matching rules — separate specific rules from the catch-all default
+        specific_matches = []
+        default_match = None
         for rule in self._rules:
+            # Skip the catch-all default for now
+            if rule.capability is None and rule.method_pattern is None:
+                default_match = rule
+                continue
+            # Check capability match
             if rule.capability and rule.capability != capability:
                 continue
+            # Check method pattern match
             if rule.method_pattern:
                 if not re.search(rule.method_pattern, method):
                     continue
-            matches.append(rule)
+            specific_matches.append(rule)
 
-        if not matches:
-            # No rule matched — default to REQUIRE_APPROVAL (safe default)
-            logger.warning(f"PolicyEngine: no rule for ({capability}, {method}) — defaulting to require_approval")
+        # 3. If specific rules matched, use them (highest risk wins)
+        if specific_matches:
+            specific_matches.sort(key=lambda r: list(RiskLevel).index(r.risk), reverse=True)
+            rule = specific_matches[0]
+            logger.debug(f"PolicyEngine: ({capability}, {method}) → {rule.decision.value} (risk={rule.risk.value}, rule={rule.name})")
             return {
-                "decision": PolicyDecision.REQUIRE_APPROVAL.value,
-                "risk": RiskLevel.MEDIUM.value,
-                "rule": "default_unknown",
-                "rationale": f"No policy defined for ({capability}, {method}) — requiring approval by default",
+                "decision": rule.decision.value,
+                "risk": rule.risk.value,
+                "rule": rule.name,
+                "rationale": rule.rationale,
             }
 
-        # Pick the most specific match (highest risk wins if multiple match)
-        matches.sort(key=lambda r: list(RiskLevel).index(r.risk), reverse=True)
-        rule = matches[0]
-        logger.debug(f"PolicyEngine: ({capability}, {method}) → {rule.decision.value} (risk={rule.risk.value}, rule={rule.name})")
+        # 4. If no specific rule matched but there's a catch-all default, use it
+        if default_match:
+            logger.debug(f"PolicyEngine: ({capability}, {method}) → {default_match.decision.value} (default rule, risk={default_match.risk.value})")
+            return {
+                "decision": default_match.decision.value,
+                "risk": default_match.risk.value,
+                "rule": default_match.name,
+                "rationale": default_match.rationale,
+            }
+
+        # 5. No rule matched at all — safe default: REQUIRE_APPROVAL
+        logger.warning(f"PolicyEngine: no rule for ({capability}, {method}) — defaulting to require_approval")
         return {
-            "decision": rule.decision.value,
-            "risk": rule.risk.value,
-            "rule": rule.name,
-            "rationale": rule.rationale,
+            "decision": PolicyDecision.REQUIRE_APPROVAL.value,
+            "risk": RiskLevel.MEDIUM.value,
+            "rule": "default_unknown",
+            "rationale": f"No policy defined for ({capability}, {method}) — requiring approval by default",
         }
 
     def list_rules(self) -> list[dict]:
