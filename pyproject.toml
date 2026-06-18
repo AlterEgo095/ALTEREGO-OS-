@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alterego-os"
+version = "0.1.0"
+description = "ALTEREGO OS — AI Operating System. V1 manual build, Kernel-first."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [{name = "ALTEREGO"}]
+keywords = ["ai", "os", "kernel", "orchestrator", "agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+dependencies = [
+    # Kernel
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0",
+    "uvicorn[standard]>=0.24.0",
+    "fastapi>=0.104.0",
+    "httpx>=0.25.0",
+    # Event bus — V1 uses in-process asyncio; upgrade to NATS later
+    # Memory — V1 uses SQLite; upgrade to PostgreSQL later
+    "aiosqlite>=0.19.0",
+    # LLM (via LiteLLM once installed; for V1 use openai SDK)
+    "openai>=1.6.0",
+    # Plugins
+    "PyGithub>=2.1.0",
+    "docker>=7.0.0",
+    "paramiko>=3.4.0",
+    "playwright>=1.40.0",
+    "asyncpg>=0.29.0",
+    "motor>=3.3.0",
+    "aiosmtplib>=3.0.0",
+    # Utils
+    "tenacity>=8.2.0",
+    "loguru>=0.7.0",
+    "typer>=0.9.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.0",
+    "mypy>=1.7",
+]
+
+[project.scripts]
+alterego = "alterego.cli:main"
+
+[project.entry-points."alterego.plugins"]
+github = "alterego.plugins.github:GitHubPlugin"
+docker = "alterego.plugins.docker:DockerPlugin"
+ssh = "alterego.plugins.ssh:SSHPlugin"
+browser = "alterego.plugins.browser:BrowserPlugin"
+filesystem = "alterego.plugins.filesystem:FilesystemPlugin"
+postgres = "alterego.plugins.postgres:PostgresPlugin"
+mongo = "alterego.plugins.mongo:MongoPlugin"
+llm = "alterego.plugins.llm:LLMPlugin"
+email = "alterego.plugins.email:EmailPlugin"
+telegram = "alterego.plugins.telegram:TelegramPlugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["alterego*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+warn_unused_ignores = true
+ignore_missing_imports = true

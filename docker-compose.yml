@@ -1,0 +1,53 @@
+# ALTEREGO OS — Docker Compose (V1)
+# Only the external services that plugins connect to.
+# ALTEREGO itself runs from source (pip install -e .) for now.
+
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: alterego-postgres
+    environment:
+      POSTGRES_USER: alterego
+      POSTGRES_PASSWORD: alterego
+      POSTGRES_DB: alterego
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: alterego-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: alterego
+      MONGO_INITDB_ROOT_PASSWORD: alterego
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: alterego-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    # For GPU support, uncomment:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  postgres_data:
+  mongo_data:
+  ollama_data:

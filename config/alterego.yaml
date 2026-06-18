@@ -1,0 +1,74 @@
+# ALTEREGO OS configuration (V1)
+# YAML config — overrides .env where present
+
+kernel:
+  log_level: INFO
+  validation_strict: true
+  # Which validation steps to enforce (V1: 4 steps; V2: 8 steps)
+  validation_steps: [llm, critic, validator, security]
+
+memory:
+  # V1: SQLite. V2 will switch to PostgreSQL without changing Memory interface.
+  backend: sqlite
+  path: ./data/alterego.db
+
+event_bus:
+  # V1: in-process asyncio. V2 will switch to NATS JetStream.
+  backend: asyncio
+
+llm:
+  # Provider priority: openai > ollama
+  provider: ${OPENAI_API_KEY:+openai}
+  # If OPENAI_API_KEY is set, use OpenAI; otherwise fall back to Ollama local.
+  fallback_provider: ollama
+  models:
+    chat: gpt-4o-mini
+    reasoning: ollama:deepseek-r1
+    fast: gpt-4o-mini
+
+plugins:
+  # Only V1 plugins are loaded. Others are ignored.
+  enabled:
+    - github
+    - docker
+    - ssh
+    - browser
+    - filesystem
+    - postgres
+    - mongo
+    - llm
+    - email
+    - telegram
+
+# Capability Registry — what each capability needs
+capabilities:
+  github:
+    description: "GitHub operations: clone, commit, PR, issues"
+    required_plugins: [github]
+  docker:
+    description: "Docker containers: build, restart, logs"
+    required_plugins: [docker]
+  ssh:
+    description: "SSH exec, scp, tunnel"
+    required_plugins: [ssh]
+  browser:
+    description: "Browser automation: open, click, fill, screenshot"
+    required_plugins: [browser]
+  filesystem:
+    description: "File operations: read, write, watch"
+    required_plugins: [filesystem]
+  database.sql:
+    description: "PostgreSQL queries"
+    required_plugins: [postgres]
+  database.nosql:
+    description: "MongoDB queries"
+    required_plugins: [mongo]
+  llm.chat:
+    description: "LLM chat completion"
+    required_plugins: [llm]
+  email:
+    description: "Send/receive email"
+    required_plugins: [email]
+  telegram:
+    description: "Telegram notifications"
+    required_plugins: [telegram]
