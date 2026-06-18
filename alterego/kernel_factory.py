@@ -100,6 +100,16 @@ def build_kernel(
     daily = DailyAssistant(memory=memory, goal_engine=goal_engine, initiative_engine=initiative, llm_plugin=llm_plugin)
     context = ContextEngine(memory=memory, digital_twin=digital_twin, goal_engine=goal_engine)
 
+    # 7.3 V2.1 — Real Life Connection
+    from alterego.kernel.digital_twin_v2 import DigitalTwinV2
+    from alterego.kernel.life_timeline import LifeTimeline
+    from alterego.kernel.long_term_memory import LongTermMemory
+    from alterego.kernel.unified_workspace import UnifiedWorkspace
+    twin_v2 = DigitalTwinV2(memory=memory)
+    timeline = LifeTimeline(memory=memory, event_bus=bus)
+    long_term = LongTermMemory(memory=memory, timeline=timeline)
+    workspace = UnifiedWorkspace(plugin_manager=pm, digital_twin=twin_v2)
+
     # 7. Departments
     if departments_dir is None:
         # Default to the repo's departments/ directory
@@ -137,4 +147,9 @@ def build_kernel(
         "goal_engine": goal_engine,
         "daily_assistant": daily,
         "context_engine": context,
+        # V2.1
+        "digital_twin_v2": twin_v2,
+        "life_timeline": timeline,
+        "long_term_memory": long_term,
+        "unified_workspace": workspace,
     }

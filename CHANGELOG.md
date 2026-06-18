@@ -1,5 +1,57 @@
 # CHANGELOG — ALTEREGO OS
 
+## V2.1 (2026-06-18) — Connecté à la vie réelle
+
+### Added
+- **Digital Twin V2** (Étape 1) — graphe de connaissances complet de l'utilisateur
+  - 17 types d'entités : identity, company, project, repository, server, application, document, client, goal, habit, calendar_event, skill, preference, history, roadmap, decision, relation
+  - Relations typées entre entités (belongs_to, hosted_on, depends_on, created_by...)
+  - `add_relation()`, `get_relations()`, `get_related()` pour naviguer le graphe
+  - Convenience methods : `add_company()`, `add_project()`, `add_server()`, `add_application()`, `add_decision()`, `add_skill()`, `add_roadmap()`, `add_calendar_event()`, `add_habit()`
+  - `describe()` affiche le profil complet
+  - CLI: `alterego twin-v2`
+
+- **Life Timeline** (Étape 4) — historique vivant d'ALTEREGO
+  - Enregistre tous les événements importants (mission_created, mission_completed, goal_reached, error, decision, learning, habit, preference)
+  - `record()`, `get_events()`, `get_today()`, `get_recent()`, `get_critical()`, `summary()`
+  - Filtrage par type, sévérité, plage de dates
+  - CLI: `alterego timeline summary|today|recent|critical`
+
+- **Long Term Memory** (Étape 3) — raisonnement sur plusieurs mois
+  - `search_conversations()`, `search_missions()`, `search_decisions()` — recherche par mot-clé
+  - `compare_periods()` — comparer deux périodes (missions, conversations, succès)
+  - `detect_trends()` — détecter tendances (volume, succès, activité)
+  - `find_old_idea()` — retrouver une ancienne idée/discussion/décision
+  - `historical_summary()` — synthèse sur N jours
+  - CLI: `alterego remember "SQLite"`
+
+- **Unified Workspace** (Étape 2) — interface unique pour tous les outils
+  - `overview()` — tous les plugins connectés, santé, capacités
+  - `status()` — santé de chaque connexion
+  - `list_resources()` — ressources GitHub, Docker, filesystem, Digital Twin
+  - `search()` — recherche cross-outils
+  - `describe()` — vue humaine lisible
+  - CLI: `alterego workspace`
+
+### Changed
+- Kernel expose désormais **22 composants** (18 + DigitalTwinV2 + LifeTimeline + LongTermMemory + UnifiedWorkspace)
+- `kernel_factory.py` câble les 4 nouveaux composants
+- CLI: 4 nouvelles commandes (`timeline`, `workspace`, `remember`, `twin-v2`)
+
+### Tested
+- Digital Twin V2 : 9 entités créées + 3 relations → graphe navigable ✓
+- Life Timeline : 4 événements enregistrés avec sévérités → résumé généré ✓
+- Long Term Memory : recherche "SQLite" → 2 conversations + 1 décision retrouvées ✓
+- Trends : increasing/improving détectés ✓
+
+### Components count
+- **22 Kernel components**
+- **11 Departments**
+- **10 Plugins**
+- **75 tests unitaires**
+
+---
+
 ## V2.0 (2026-06-18) — ALTEREGO devient un collaborateur vivant
 
 ### Added

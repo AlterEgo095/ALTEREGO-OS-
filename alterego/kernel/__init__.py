@@ -44,6 +44,10 @@ from alterego.kernel.digital_twin import DigitalTwin
 from alterego.kernel.goal_engine import GoalEngine, Goal, Objective, GoalStatus
 from alterego.kernel.daily_assistant import DailyAssistant
 from alterego.kernel.context_engine import ContextEngine
+from alterego.kernel.digital_twin_v2 import DigitalTwinV2
+from alterego.kernel.life_timeline import LifeTimeline
+from alterego.kernel.long_term_memory import LongTermMemory
+from alterego.kernel.unified_workspace import UnifiedWorkspace
 
 __all__ = [
     # Base contracts
@@ -67,4 +71,6 @@ __all__ = [
     # V2 — goal engine + daily assistant + context
     "GoalEngine", "Goal", "Objective", "GoalStatus",
     "DailyAssistant", "ContextEngine",
+    # V2.1 — real life connection
+    "DigitalTwinV2", "LifeTimeline", "LongTermMemory", "UnifiedWorkspace",
 ]

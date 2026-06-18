@@ -381,6 +381,80 @@ def context():
     asyncio.run(_run)
 
 
+@app.command(name="timeline")
+def timeline_cmd(
+    action: str = typer.Argument("summary", help="summary | today | recent | critical"),
+    hours: int = typer.Option(24, "--hours", "-h", help="Hours to look back (for 'recent')"),
+):
+    """View the Life Timeline — ALTEREGO's living history."""
+    kernel = build_kernel()
+    tl = kernel["life_timeline"]
+
+    async def _run():
+        if action == "summary":
+            report = await tl.summary(days=7)
+        elif action == "today":
+            events = await tl.get_today()
+            report = f"Today's events ({len(events)}):\n" + "\n".join(
+                f"  [{e.get('severity', '?')}] {e.get('title', '?')[:60]}" for e in events[:20]
+            )
+        elif action == "recent":
+            events = await tl.get_recent(hours=hours)
+            report = f"Last {hours}h ({len(events)} events):\n" + "\n".join(
+                f"  [{e.get('severity', '?')}] {e.get('timestamp', '?')[:19]} {e.get('title', '?')[:50]}" for e in events[:20]
+            )
+        elif action == "critical":
+            events = await tl.get_critical()
+            report = f"Critical events ({len(events)}):\n" + "\n".join(
+                f"  [{e.get('severity', '?')}] {e.get('timestamp', '?')[:19]} {e.get('title', '?')[:50]}" for e in events[:20]
+            )
+        else:
+            report = f"Unknown action: {action}"
+        console.print(Panel(report, title="📅 Life Timeline", border_style="magenta"))
+
+    asyncio.run(_run())
+
+
+@app.command(name="workspace")
+def workspace_cmd():
+    """Show the Unified Workspace — all connected tools in one view."""
+    kernel = build_kernel()
+
+    async def _run():
+        await kernel["plugin_manager"].initialize_all()
+        ws = kernel["unified_workspace"]
+        desc = await ws.describe()
+        console.print(Panel(desc, title="🌐 Unified Workspace", border_style="cyan"))
+
+    asyncio.run(_run())
+
+
+@app.command(name="remember")
+def remember(query: str = typer.Argument(..., help="What to search for")):
+    """Search long-term memory — find old ideas, conversations, decisions."""
+    kernel = build_kernel()
+
+    async def _run():
+        ltm = kernel["long_term_memory"]
+        result = await ltm.find_old_idea(query)
+        console.print(Panel(result, title=f"🔍 Memory Search: '{query}'", border_style="yellow"))
+
+    asyncio.run(_run)
+
+
+@app.command(name="twin-v2")
+def twin_v2_cmd():
+    """Show Digital Twin V2 — complete knowledge graph."""
+    kernel = build_kernel()
+    twin = kernel["digital_twin_v2"]
+
+    async def _run():
+        desc = await twin.describe()
+        console.print(Panel(desc, title="🧠 Digital Twin V2", border_style="magenta"))
+
+    asyncio.run(_run)
+
+
 def main() -> None:
     app()
 
