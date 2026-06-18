@@ -1,0 +1,27 @@
+{
+  "audit": "chief_of_staff",
+  "tests": [
+    {
+      "test": "no_internal_leak",
+      "total_requests": 95,
+      "leaked_responses": 0,
+      "no_leak_responses": 95,
+      "leaked_examples": [],
+      "passed": true
+    },
+    {
+      "test": "always_conversational",
+      "total_requests": 95,
+      "non_conversational_responses": 0,
+      "passed": true
+    },
+    {
+      "test": "no_crash_on_user_input",
+      "total_requests": 95,
+      "crashes": 0,
+      "passed": true
+    }
+  ],
+  "issues": [],
+  "score": 100
+}

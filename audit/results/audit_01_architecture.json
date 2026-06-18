@@ -1,0 +1,364 @@
+{
+  "audit": "architecture",
+  "modules": {
+    "alterego.kernel.base": {
+      "classes": [
+        "BridgeSpec",
+        "PluginSpec",
+        "CapabilitySpec",
+        "MissionStatus",
+        "Mission",
+        "Event",
+        "BaseCapability",
+        "BaseBridge",
+        "BasePlugin"
+      ],
+      "abstract_classes": [
+        "BaseCapability",
+        "BaseBridge"
+      ],
+      "public_functions": [
+        "touch",
+        "spec",
+        "call",
+        "methods",
+        "health",
+        "events_produced",
+        "initialize",
+        "shutdown"
+      ],
+      "loc": 137
+    },
+    "alterego.kernel.capability_registry": {
+      "classes": [
+        "CapabilityRegistry"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "register",
+        "get",
+        "list",
+        "exists",
+        "describe"
+      ],
+      "loc": 47
+    },
+    "alterego.kernel.chief_of_staff": {
+      "classes": [
+        "ChiefOfStaff"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "chat"
+      ],
+      "loc": 89
+    },
+    "alterego.kernel.decision_engine": {
+      "classes": [
+        "DecisionEngine"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "analyze_and_plan"
+      ],
+      "loc": 70
+    },
+    "alterego.kernel.event_bus": {
+      "classes": [
+        "EventBus",
+        "InProcessEventBus"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "publish",
+        "subscribe",
+        "unsubscribe",
+        "publish",
+        "subscribe",
+        "unsubscribe"
+      ],
+      "loc": 94
+    },
+    "alterego.kernel.memory": {
+      "classes": [
+        "MemoryRecord",
+        "Memory",
+        "SQLiteMemory"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "put",
+        "get",
+        "query",
+        "update",
+        "delete",
+        "put",
+        "get",
+        "query",
+        "update",
+        "delete"
+      ],
+      "loc": 162
+    },
+    "alterego.kernel.mission_engine": {
+      "classes": [
+        "MissionEngine"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "create",
+        "run"
+      ],
+      "loc": 141
+    },
+    "alterego.kernel.planner": {
+      "classes": [
+        "Task",
+        "Planner"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "plan"
+      ],
+      "loc": 144
+    },
+    "alterego.kernel.plugin_manager": {
+      "classes": [
+        "PluginManager"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "discover",
+        "initialize_all",
+        "shutdown_all",
+        "get",
+        "best_for",
+        "list_plugins",
+        "list_capabilities",
+        "describe"
+      ],
+      "loc": 97
+    },
+    "alterego.plugins.__init__": {
+      "classes": [],
+      "abstract_classes": [],
+      "public_functions": [],
+      "loc": 1
+    },
+    "alterego.plugins.browser.__init__": {
+      "classes": [
+        "BrowserPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 94
+    },
+    "alterego.plugins.docker.__init__": {
+      "classes": [
+        "DockerPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 128
+    },
+    "alterego.plugins.email.__init__": {
+      "classes": [
+        "EmailPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 78
+    },
+    "alterego.plugins.filesystem.__init__": {
+      "classes": [
+        "FilesystemPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "methods",
+        "call",
+        "initialize",
+        "health",
+        "shutdown"
+      ],
+      "loc": 125
+    },
+    "alterego.plugins.github.__init__": {
+      "classes": [
+        "GitHubPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 121
+    },
+    "alterego.plugins.llm.__init__": {
+      "classes": [
+        "LLMPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 105
+    },
+    "alterego.plugins.mongo.__init__": {
+      "classes": [
+        "MongoPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 83
+    },
+    "alterego.plugins.postgres.__init__": {
+      "classes": [
+        "PostgresPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 69
+    },
+    "alterego.plugins.ssh.__init__": {
+      "classes": [
+        "SSHPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 112
+    },
+    "alterego.plugins.telegram.__init__": {
+      "classes": [
+        "TelegramPlugin"
+      ],
+      "abstract_classes": [],
+      "public_functions": [
+        "initialize",
+        "methods",
+        "call",
+        "health",
+        "shutdown"
+      ],
+      "loc": 74
+    }
+  },
+  "dependency_graph": {
+    "alterego.kernel.base": [],
+    "alterego.kernel.capability_registry": [
+      "alterego.kernel.base"
+    ],
+    "alterego.kernel.chief_of_staff": [
+      "alterego.kernel.base",
+      "alterego.kernel.event_bus",
+      "alterego.kernel.memory",
+      "alterego.kernel.mission_engine"
+    ],
+    "alterego.kernel.decision_engine": [
+      "alterego.kernel.base",
+      "alterego.kernel.memory",
+      "alterego.kernel.planner"
+    ],
+    "alterego.kernel.event_bus": [
+      "alterego.kernel.base"
+    ],
+    "alterego.kernel.memory": [],
+    "alterego.kernel.mission_engine": [
+      "alterego.kernel.base",
+      "alterego.kernel.decision_engine",
+      "alterego.kernel.event_bus",
+      "alterego.kernel.memory",
+      "alterego.kernel.plugin_manager"
+    ],
+    "alterego.kernel.planner": [
+      "alterego.kernel.base",
+      "alterego.kernel.capability_registry"
+    ],
+    "alterego.kernel.plugin_manager": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.__init__": [],
+    "alterego.plugins.browser.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.docker.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.email.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.filesystem.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.github.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.llm.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.mongo.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.postgres.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.ssh.__init__": [
+      "alterego.kernel.base"
+    ],
+    "alterego.plugins.telegram.__init__": [
+      "alterego.kernel.base"
+    ]
+  },
+  "circular_dependencies": [],
+  "issues": [
+    {
+      "severity": "critical",
+      "category": "interface_stability",
+      "message": "Missing ABCs in base.py: {'BasePlugin'}"
+    }
+  ],
+  "score": 85
+}

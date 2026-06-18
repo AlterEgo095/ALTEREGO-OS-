@@ -1,0 +1,135 @@
+{
+  "audit": "observability",
+  "tests": [
+    {
+      "test": "structured_logging",
+      "modules_using_loguru": [
+        "chief_of_staff.py",
+        "event_bus.py",
+        "decision_engine.py",
+        "memory.py",
+        "mission_engine.py",
+        "planner.py",
+        "capability_registry.py",
+        "plugin_manager.py"
+      ],
+      "passed": true,
+      "v1_behavior": "loguru used across kernel modules",
+      "v2_needed": [
+        "Structured JSON logs (not just text)",
+        "Correlation IDs per mission (trace every event back to its mission)",
+        "Log levels configurable per module"
+      ]
+    },
+    {
+      "test": "metrics_infrastructure",
+      "v1_has_metrics": false,
+      "passed": false,
+      "v2_needed": [
+        "prometheus_client for counters/histograms",
+        "Metrics: missions_total, missions_completed, missions_failed, plugin_calls_total, plugin_errors_total, llm_tokens_total, llm_cost_total, event_bus_published_total",
+        "Metrics endpoint /metrics for scraping"
+      ]
+    },
+    {
+      "test": "health_check_endpoint",
+      "v1_has_health_cli": true,
+      "passed": true,
+      "v1_behavior": "alterego health command checks all plugins",
+      "v2_needed": [
+        "HTTP /health endpoint for k8s liveness/readiness probes",
+        "Detailed /health/ready vs /health/live distinction"
+      ]
+    },
+    {
+      "test": "latency_measurement",
+      "samples": 50,
+      "avg_ms": 2.3,
+      "p99_ms": 3.86,
+      "min_ms": 1.79,
+      "max_ms": 3.86,
+      "passed": true,
+      "v2_needed": [
+        "Per-stage latency tracking (CoS\u2192Engine\u2192Planner\u2192Plugin\u2192Response)",
+        "Latency histogram per capability",
+        "Slow query log (>500ms)"
+      ]
+    },
+    {
+      "test": "plugin_call_counting",
+      "v1_has_counter": false,
+      "passed": false,
+      "v2_needed": [
+        "Counter per (plugin, method) pair",
+        "Counter for success/failure ratio",
+        "Expose via /metrics endpoint"
+      ]
+    },
+    {
+      "test": "llm_cost_tracking",
+      "v1_returns_usage_per_call": true,
+      "v1_aggregates_cost": false,
+      "passed": true,
+      "v2_needed": [
+        "Aggregate tokens per mission, per user, per day",
+        "Cost calculation (tokens \u00d7 price per model)",
+        "Daily/weekly cost reports",
+        "Cost alerts (budget thresholds)"
+      ]
+    },
+    {
+      "test": "memory_usage_tracking",
+      "v1_has_tracking": false,
+      "passed": false,
+      "v2_needed": [
+        "RSS memory tracking (psutil.Process().memory_info().rss)",
+        "Memory per plugin (if isolated in subprocess)",
+        "Memory alerts (notify if RSS > threshold)"
+      ]
+    },
+    {
+      "test": "cpu_usage_tracking",
+      "v1_has_tracking": false,
+      "passed": false,
+      "v2_needed": [
+        "CPU% per plugin",
+        "CPU time per mission",
+        "Alerts on sustained high CPU"
+      ]
+    },
+    {
+      "test": "error_tracking",
+      "v1_logs_errors": true,
+      "v1_aggregates_errors": false,
+      "passed": true,
+      "v2_needed": [
+        "Error counter per (component, error_type)",
+        "Error rate alerting (>5% failure rate)",
+        "Sentry integration for production"
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "severity": "warning",
+      "test": "test_metrics_infrastructure",
+      "message": "{'test': 'metrics_infrastructure', 'v1_has_metrics': False, 'passed': False, 'v2_needed': ['prometheus_client for counters/histograms', 'Metrics: missions_total, missions_completed, missions_failed, plugin_calls_total, plugin_errors_total, llm_tokens_total, llm_cost_total, event_bus_published_total', 'Metrics endpoint /metrics for scraping']}"
+    },
+    {
+      "severity": "warning",
+      "test": "test_plugin_call_counting",
+      "message": "{'test': 'plugin_call_counting', 'v1_has_counter': False, 'passed': False, 'v2_needed': ['Counter per (plugin, method) pair', 'Counter for success/failure ratio', 'Expose via /metrics endpoint']}"
+    },
+    {
+      "severity": "warning",
+      "test": "test_memory_usage_tracking",
+      "message": "{'test': 'memory_usage_tracking', 'v1_has_tracking': False, 'passed': False, 'v2_needed': ['RSS memory tracking (psutil.Process().memory_info().rss)', 'Memory per plugin (if isolated in subprocess)', 'Memory alerts (notify if RSS > threshold)']}"
+    },
+    {
+      "severity": "warning",
+      "test": "test_cpu_usage_tracking",
+      "message": "{'test': 'cpu_usage_tracking', 'v1_has_tracking': False, 'passed': False, 'v2_needed': ['CPU% per plugin', 'CPU time per mission', 'Alerts on sustained high CPU']}"
+    }
+  ],
+  "score": 55
+}

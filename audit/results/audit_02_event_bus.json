@@ -1,0 +1,70 @@
+{
+  "audit": "event_bus",
+  "tests": [
+    {
+      "test": "basic_throughput",
+      "published": 1000,
+      "received": 1000,
+      "passed": true
+    },
+    {
+      "test": "100_concurrent_missions",
+      "expected_events": 1000,
+      "received_events": 1000,
+      "passed": true
+    },
+    {
+      "test": "handler_failure_isolation",
+      "published": 2,
+      "good_handler_received": 2,
+      "passed": true
+    },
+    {
+      "test": "wildcard_matching",
+      "expected_matches": 3,
+      "actual_matches": 3,
+      "subjects": [
+        "mission.created",
+        "mission.completed",
+        "mission.failed"
+      ],
+      "passed": true
+    },
+    {
+      "test": "unsubscribe_stops_delivery",
+      "expected": 1,
+      "actual": 1,
+      "passed": true
+    },
+    {
+      "test": "latency",
+      "samples": 1000,
+      "avg_ms": 0.015,
+      "p99_ms": 0.023,
+      "passed": true
+    },
+    {
+      "test": "restart_persistence",
+      "expected_volatile_behavior": "in-process bus is volatile; events published before subscribe are lost on restart",
+      "received": [
+        "test.after",
+        "test.after_restart"
+      ],
+      "passed": true,
+      "recommendation": "V2: switch to NATS JetStream for persistence + replay"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "info",
+      "category": "persistence",
+      "message": "In-process bus is volatile; no replay on restart. V2: NATS JetStream."
+    },
+    {
+      "severity": "info",
+      "category": "concurrency",
+      "message": "Handlers run sequentially per event (not concurrent). V2: consider concurrent fan-out."
+    }
+  ],
+  "score": 98
+}

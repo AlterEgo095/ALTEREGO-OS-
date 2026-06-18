@@ -1,0 +1,137 @@
+{
+  "audit": "security",
+  "tests": [
+    {
+      "test": "prompt_injection_in_user_message",
+      "v1_mitigations": [
+        "System prompt is set by Kernel, not user",
+        "User input always passed as `user` param, never `system`",
+        "Plan\u2192Execute pipeline: user can't directly invoke plugins"
+      ],
+      "v2_needed": [
+        "Add injection pattern detector (regex + LLM-as-judge)",
+        "Sanitize LLM output before passing to plugins",
+        "Add allowlist of plugin methods callable by LLM-generated plans"
+      ],
+      "passed": true
+    },
+    {
+      "test": "plugin_injection_via_entry_points",
+      "v1_mitigations": [
+        "Plugins require explicit `pip install` (user action)",
+        "PluginManager catches init errors"
+      ],
+      "v2_needed": [
+        "Plugin signing (GPG or sigstore)",
+        "Subprocess/container isolation for untrusted plugins",
+        "Manifest with capability allowlist",
+        "Supply chain scanning (pip-audit in CI)"
+      ],
+      "v1_risk": "MEDIUM \u2014 any pip-installed package can register a plugin",
+      "passed": true
+    },
+    {
+      "test": "command_injection_in_ssh_plugin",
+      "uses_shell_true": false,
+      "uses_paramiko_exec_command": true,
+      "v1_mitigations": [
+        "Paramiko's exec_command doesn't invoke a local shell (no shell=True)",
+        "Command runs on the remote server, not locally",
+        "User can't directly set SSH params (Planner does)"
+      ],
+      "v2_needed": [
+        "Allowlist of allowed commands",
+        "Shell metacharacter escaping",
+        "Audit log"
+      ],
+      "passed": true
+    },
+    {
+      "test": "command_injection_in_docker_plugin",
+      "uses_shell_true": false,
+      "uses_exec_run": true,
+      "v1_mitigations": [
+        "docker-py's exec_run runs inside container (no local shell)",
+        "User can't directly set exec params"
+      ],
+      "passed": true
+    },
+    {
+      "test": "path_traversal_in_filesystem_plugin",
+      "v1_behavior": "filesystem plugin can read ANY path (no sandbox)",
+      "can_read_etc_passwd": true,
+      "passed": false,
+      "severity": "critical",
+      "v2_needed": [
+        "Configurable root directory (config/filesystem.root)",
+        "Reject paths that resolve outside the root (resolve + check prefix)",
+        "Per-mission scratch directory (missions can't escape their scratch)"
+      ]
+    },
+    {
+      "test": "path_traversal_with_dotdot",
+      "passed": true
+    },
+    {
+      "test": "sandbox_escape_via_python_eval",
+      "uses_python_eval_directly": false,
+      "v1_behavior": "Browser plugin's evaluate() runs JS in the browser sandbox (Playwright), not Python eval()",
+      "passed": true
+    },
+    {
+      "test": "secret_leakage_in_logs",
+      "leaks_found": [],
+      "passed": true,
+      "v1_behavior": "Plugins read secrets from env vars and pass to libraries; no direct logging of env values",
+      "v2_needed": [
+        "Secret redaction in log formatter (mask values matching sk-*, ghp_*, etc.)",
+        "Structured logging with secret fields marked as redacted"
+      ]
+    },
+    {
+      "test": "secret_leakage_in_memory",
+      "has_secrets_entity": false,
+      "passed": true,
+      "v1_behavior": "No 'secrets' entity type \u2014 secrets stay in env vars, not Memory",
+      "recommendation": "V2: if secrets must be stored, use SOPS/OpenBao, not Memory"
+    },
+    {
+      "test": "supply_chain_dependencies",
+      "unpinned_deps": [
+        "requires = [\"setuptools>=68\", \"wheel\"]",
+        "requires-python = \">=3.11",
+        "pydantic>=2.5.0",
+        "pyyaml>=6.0",
+        "uvicorn[standard]>=0.24.0"
+      ],
+      "passed": true,
+      "v1_behavior": "Dependencies use >= (flexible)",
+      "v2_needed": [
+        "Pin exact versions in requirements.lock",
+        "Run pip-audit in CI",
+        "Run safety check in CI",
+        "SBOM generation (Syft)"
+      ]
+    },
+    {
+      "test": "llm_output_not_trusted_directly",
+      "planner_validates_json": true,
+      "planner_has_fallback": true,
+      "passed": true,
+      "v1_behavior": "Planner parses LLM JSON output into Task objects (Pydantic); invalid JSON triggers fallback",
+      "v2_needed": [
+        "Allowlist of (capability, method) pairs the LLM can request",
+        "Schema validation of params per (capability, method)",
+        "Reject plans that include forbidden methods"
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "severity": "critical",
+      "test": "test_path_traversal_in_filesystem_plugin",
+      "message": "{'test': 'path_traversal_in_filesystem_plugin', 'v1_behavior': 'filesystem plugin can read ANY path (no sandbox)', 'can_read_etc_passwd': True, 'passed': False, 'severity': 'critical', 'v2_needed': ['Configurable root directory (config/filesystem.root)', 'Reject paths that resolve outside the root (resolve + check prefix)', \"Per-mission scratch directory (missions can't escape their scratch)\"]}"
+    }
+  ],
+  "score": 75
+}

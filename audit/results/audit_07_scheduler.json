@@ -1,0 +1,72 @@
+{
+  "audit": "scheduler",
+  "tests": [
+    {
+      "test": "100_sequential_tasks_deterministic",
+      "mission_status": "completed",
+      "task_count": 1,
+      "passed": false
+    },
+    {
+      "test": "timeout_with_asyncio_wait_for",
+      "passed": true,
+      "elapsed_ms": 300.6,
+      "behavior": "asyncio.wait_for cancels hanging tasks cleanly"
+    },
+    {
+      "test": "retry_pattern",
+      "max_retries": 3,
+      "attempts_made": 3,
+      "succeeded": true,
+      "passed": true,
+      "behavior": "V1: caller implements retry. V2: built into MissionEngine with tenacity.",
+      "recommendation": "Add @retry decorator from tenacity in MissionEngine._execute_task for V2"
+    },
+    {
+      "test": "cancellation_via_asyncio",
+      "passed": true,
+      "behavior": "asyncio.CancelledError propagates correctly"
+    },
+    {
+      "test": "priority_is_documented_but_not_implemented",
+      "passed": true,
+      "v1_behavior": "Tasks run in submission order (FIFO). No priority queue.",
+      "v2_plan": "Add PriorityQueue in MissionEngine. Tasks get priority from Planner.",
+      "severity": "info"
+    },
+    {
+      "test": "mission_failure_does_not_block_subsequent_missions",
+      "mission1_status": "completed",
+      "mission2_status": "completed",
+      "passed": true
+    }
+  ],
+  "issues": [
+    {
+      "severity": "critical",
+      "test": "test_100_sequential_tasks_deterministic",
+      "message": "{'test': '100_sequential_tasks_deterministic', 'mission_status': 'completed', 'task_count': 1, 'passed': False}"
+    },
+    {
+      "severity": "warning",
+      "category": "no_priority_queue",
+      "message": "V1 has no priority queue. V2: add PriorityQueue."
+    },
+    {
+      "severity": "warning",
+      "category": "no_builtin_retry",
+      "message": "V1 has no built-in retry. Caller must implement. V2: use tenacity."
+    },
+    {
+      "severity": "warning",
+      "category": "no_builtin_timeout",
+      "message": "V1 has no built-in per-task timeout. V2: wrap _execute_task with asyncio.wait_for(default 30s)."
+    },
+    {
+      "severity": "info",
+      "category": "sequential_execution",
+      "message": "V1 runs tasks sequentially. V2: support parallel execution for independent tasks."
+    }
+  ],
+  "score": 73
+}

@@ -1,0 +1,68 @@
+{
+  "audit": "performance",
+  "tests": [
+    {
+      "test": "1000_missions_throughput",
+      "missions": 1000,
+      "total_elapsed_sec": 29.38,
+      "throughput_per_sec": 34.0,
+      "avg_latency_ms": 29.37,
+      "p50_latency_ms": 28.83,
+      "p95_latency_ms": 52.06,
+      "p99_latency_ms": 57.56,
+      "max_latency_ms": 64.24,
+      "peak_ram_mb": 4.42,
+      "passed": true
+    },
+    {
+      "test": "100_simulated_plugins_load",
+      "elapsed_ms": 0.02,
+      "passed": true,
+      "note": "Real plugin init time depends on plugin code; PluginManager itself is negligible"
+    },
+    {
+      "test": "50_conversations_in_memory",
+      "records_written": 500,
+      "write_elapsed_ms": 94.87,
+      "query_one_conversation_ms": 2.2,
+      "records_found": 10,
+      "passed": true
+    },
+    {
+      "test": "10000_events_throughput",
+      "events_published": 10000,
+      "events_received": 10000,
+      "elapsed_sec": 0.156,
+      "throughput_per_sec": 64086.0,
+      "passed": true
+    },
+    {
+      "test": "plugin_call_latency",
+      "samples": 1000,
+      "avg_ms": 0.0,
+      "p99_ms": 0.0,
+      "max_ms": 0.005,
+      "passed": true
+    },
+    {
+      "test": "memory_query_latency",
+      "records_in_db": 10000,
+      "queries": 100,
+      "avg_ms": 38.16,
+      "p99_ms": 43.24,
+      "max_ms": 43.24,
+      "passed": true,
+      "v2_needed": "Add index on common filter columns (user_id, status, etc.)"
+    },
+    {
+      "test": "event_bus_latency",
+      "samples": 10000,
+      "avg_ms": 0.0152,
+      "p99_ms": 0.0237,
+      "max_ms": 0.0723,
+      "passed": true
+    }
+  ],
+  "issues": [],
+  "score": 100
+}

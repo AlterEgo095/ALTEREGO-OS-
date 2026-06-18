@@ -1,0 +1,71 @@
+{
+  "audit": "plugin_manager",
+  "tests": [
+    {
+      "test": "load_good_plugin",
+      "passed": true
+    },
+    {
+      "test": "load_broken_init_does_not_crash_kernel",
+      "passed": true,
+      "behavior": "PluginManager caught the init exception and continued"
+    },
+    {
+      "test": "load_broken_call_does_not_crash_kernel",
+      "passed": true,
+      "behavior": "Exception propagated cleanly to caller"
+    },
+    {
+      "test": "slow_plugin_with_timeout",
+      "passed": true,
+      "elapsed_ms": 500.7,
+      "behavior": "asyncio.wait_for correctly cancelled the slow call"
+    },
+    {
+      "test": "isolation_between_plugins",
+      "good_plugin_worked_before": true,
+      "broken_plugin_raised": true,
+      "good_plugin_worked_after": true,
+      "passed": true
+    },
+    {
+      "test": "missing_capability_returns_none",
+      "passed": true,
+      "behavior": "best_for() returns None cleanly \u2014 caller must handle"
+    },
+    {
+      "test": "fake_spec_plugin",
+      "passed": true,
+      "behavior": "Plugin loads; quality validation is V2 (V1 trusts the spec)",
+      "recommendation": "V2: add runtime capability verification \u2014 try calling each declared method at load time"
+    },
+    {
+      "test": "shutdown_cleans_up",
+      "passed": true,
+      "behavior": "shutdown_all() called all shutdown hooks"
+    },
+    {
+      "test": "multiple_plugins_same_capability",
+      "best_plugin": "high_pri",
+      "passed": true
+    }
+  ],
+  "issues": [
+    {
+      "severity": "warning",
+      "category": "no_builtin_timeout",
+      "message": "PluginManager has no built-in timeout. Callers must wrap with asyncio.wait_for."
+    },
+    {
+      "severity": "warning",
+      "category": "no_capability_verification",
+      "message": "Plugin specs are trusted at load time. V2: validate by calling each declared method."
+    },
+    {
+      "severity": "warning",
+      "category": "no_health_filtering",
+      "message": "best_for() returns the first plugin by priority, doesn't check health. V2: skip unhealthy plugins."
+    }
+  ],
+  "score": 91
+}

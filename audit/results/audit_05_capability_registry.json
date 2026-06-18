@@ -1,0 +1,52 @@
+{
+  "audit": "capability_registry",
+  "tests": [
+    {
+      "test": "registry_selects_capability_not_plugin",
+      "direct_access_works": true,
+      "capability_access_works": true,
+      "passed": true,
+      "kernel_pattern": "Always best_for(capability), never get(plugin_name)"
+    },
+    {
+      "test": "multiple_plugins_same_capability_picks_best",
+      "best_plugin": "github_b",
+      "passed": true
+    },
+    {
+      "test": "capability_registry_metadata",
+      "has_github": true,
+      "has_docker": true,
+      "passed": true
+    },
+    {
+      "test": "unknown_capability_returns_none",
+      "passed": true
+    },
+    {
+      "test": "kernel_never_imports_plugins_directly",
+      "violations": [],
+      "passed": true,
+      "behavior": "Kernel only depends on alterego.kernel.base (the ABCs). Plugins are loaded dynamically via PluginManager."
+    },
+    {
+      "test": "swap_plugin_implementation_transparent",
+      "result_a": {
+        "from": "github_a"
+      },
+      "result_b": {
+        "from": "github_b"
+      },
+      "passed": true,
+      "kernel_code_changed": false
+    }
+  ],
+  "issues": [
+    {
+      "severity": "info",
+      "category": "no_health_filtering",
+      "message": "best_for() doesn't skip unhealthy plugins yet. V2: add health check filter."
+    }
+  ],
+  "score": 99
+}
