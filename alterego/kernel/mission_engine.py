@@ -29,11 +29,13 @@ class MissionEngine:
         event_bus: EventBus,
         decision_engine: DecisionEngine,
         plugin_manager: PluginManager,
+        validation_pipeline: Any = None,
     ) -> None:
         self.memory = memory
         self.event_bus = event_bus
         self.decision_engine = decision_engine
         self.plugin_manager = plugin_manager
+        self.validation = validation_pipeline
 
     async def create(self, objective: str, user_id: str = "default") -> Mission:
         """Create a new mission and persist it."""
@@ -139,6 +141,32 @@ class MissionEngine:
         )
         try:
             result = await plugin.call(task.method, task.params)
+
+            # Validation Pipeline (V1.2) — validate LLM outputs before delivery
+            if self.validation and task.capability == "llm.chat" and isinstance(result, dict):
+                content = result.get("content", "")
+                if content:
+                    val_result = await self.validation.validate(
+                        content=content,
+                        context={"objective": mission.objective, "params": task.params},
+                        capability=task.capability,
+                        method=task.method,
+                    )
+                    logger.info(f"task {task.step} validation: {val_result.overall_score:.0%} deliver={val_result.can_deliver}")
+                    # If validation blocked delivery, replace content with explanation
+                    if not val_result.can_deliver:
+                        result["content"] = f"[Validation: output blocked — {val_result.summary()}]"
+                        result["validation"] = {
+                            "score": val_result.overall_score,
+                            "can_deliver": val_result.can_deliver,
+                            "steps": [{"name": s.name, "status": s.status.value, "message": s.message} for s in val_result.steps],
+                        }
+                    else:
+                        result["validation"] = {
+                            "score": val_result.overall_score,
+                            "can_deliver": True,
+                        }
+
             return result
         except Exception as e:
             await self.event_bus.publish(

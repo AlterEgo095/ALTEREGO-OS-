@@ -1,0 +1,22 @@
+name: monitoring
+description: Monitoring operations (metrics, alerts, dashboards, health checks)
+capabilities:
+  - ssh
+  - docker
+  - filesystem
+  - llm.chat
+  - telegram
+subscribes:
+  - mission.created
+  - server.down
+  - cpu.critical
+  - ram.critical
+  - disk.critical
+publishes:
+  - alert.raised
+  - health.checked
+  - backup.completed
+roles:
+  - monitor
+  - alerter
+  - dashboard_builder

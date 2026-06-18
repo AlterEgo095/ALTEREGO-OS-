@@ -1,0 +1,19 @@
+name: finance
+description: Finance operations (invoices, payments, cost tracking, budgets)
+capabilities:
+  - llm.chat
+  - filesystem
+  - email
+  - database.sql
+subscribes:
+  - mission.created
+  - payment.received
+publishes:
+  - invoice.generated
+  - payment.processed
+  - cost.reported
+  - budget.alert
+roles:
+  - accountant
+  - cost_tracker
+  - invoicer

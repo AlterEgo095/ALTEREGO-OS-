@@ -1,0 +1,17 @@
+name: content
+description: Content operations (articles, translations, videos, documents)
+capabilities:
+  - llm.chat
+  - filesystem
+  - browser
+subscribes:
+  - mission.created
+  - course.generated
+publishes:
+  - content.published
+  - translation.ready
+  - video.generated
+roles:
+  - writer
+  - translator
+  - video_maker

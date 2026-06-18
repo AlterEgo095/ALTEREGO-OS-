@@ -1,0 +1,21 @@
+name: security
+description: Security operations (audit, vulnerability scanning, compliance, secrets)
+capabilities:
+  - filesystem
+  - github
+  - docker
+  - ssh
+  - llm.chat
+subscribes:
+  - mission.created
+  - build.failed
+  - security.alert
+publishes:
+  - security.audited
+  - vulnerability.found
+  - secret.detected
+  - compliance.checked
+roles:
+  - auditor
+  - pentester
+  - compliance_checker

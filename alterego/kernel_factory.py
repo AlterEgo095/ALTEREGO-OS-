@@ -73,12 +73,16 @@ def build_kernel(
     # LLM plugin for Planner/Decision
     llm_plugin = pm.best_for("llm.chat")
 
-    # 5. Core engines
+    # 5. V1.2 Validation Pipeline (before MissionEngine which uses it)
+    from alterego.kernel.validation_pipeline import ValidationPipeline
+    validation = ValidationPipeline(llm_plugin=llm_plugin)
+
+    # 6. Core engines
     planner = Planner(capability_registry=cap_reg, llm_plugin=llm_plugin) if llm_plugin else None
     decision = DecisionEngine(memory=memory, planner=planner, llm_plugin=llm_plugin) if llm_plugin else None
-    mission_engine = MissionEngine(memory=memory, event_bus=bus, decision_engine=decision, plugin_manager=pm)
+    mission_engine = MissionEngine(memory=memory, event_bus=bus, decision_engine=decision, plugin_manager=pm, validation_pipeline=validation)
 
-    # 6. V1.1 Engines
+    # 7. V1.1 Engines
     confidence = ConfidenceEngine(plugin_manager=pm, policy_engine=policy, memory=memory)
     learning = LearningEngine(memory=memory, event_bus=bus)
 

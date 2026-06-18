@@ -1,0 +1,21 @@
+name: automation
+description: Automation operations (workflows, scheduled tasks, integrations)
+capabilities:
+  - filesystem
+  - llm.chat
+  - ssh
+  - docker
+  - email
+  - telegram
+subscribes:
+  - mission.created
+  - mission.completed
+  - build.passed
+publishes:
+  - workflow.triggered
+  - batch.completed
+  - notification.sent
+roles:
+  - automator
+  - integrator
+  - scheduler

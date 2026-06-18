@@ -1,0 +1,17 @@
+name: education
+description: Education operations (course generation, quizzes, learning paths)
+capabilities:
+  - llm.chat
+  - filesystem
+  - browser
+subscribes:
+  - mission.created
+  - course.requested
+publishes:
+  - course.generated
+  - quiz.created
+  - learning_path.updated
+roles:
+  - educator
+  - curriculum_designer
+  - quiz_maker

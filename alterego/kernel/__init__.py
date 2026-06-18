@@ -38,6 +38,7 @@ from alterego.kernel.policy_engine import PolicyEngine, PolicyDecision, RiskLeve
 from alterego.kernel.confidence_engine import ConfidenceEngine
 from alterego.kernel.learning_engine import LearningEngine
 from alterego.kernel.departments import DepartmentLoader, DepartmentSpec
+from alterego.kernel.validation_pipeline import ValidationPipeline, ValidationResult
 
 __all__ = [
     # Base contracts
@@ -49,8 +50,10 @@ __all__ = [
     "Memory", "SQLiteMemory",
     "CapabilityRegistry", "PluginManager",
     "Planner", "DecisionEngine", "MissionEngine", "ChiefOfStaff",
-    # V1.1 — new engines
+    # V1.1 — engines
     "PolicyEngine", "PolicyDecision", "RiskLevel",
     "ConfidenceEngine", "LearningEngine",
     "DepartmentLoader", "DepartmentSpec",
+    # V1.2 — validation pipeline
+    "ValidationPipeline", "ValidationResult",
 ]

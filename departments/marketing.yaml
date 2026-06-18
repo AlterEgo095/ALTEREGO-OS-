@@ -1,0 +1,19 @@
+name: marketing
+description: Marketing operations (content marketing, SEO, social media, growth)
+capabilities:
+  - browser
+  - llm.chat
+  - filesystem
+  - email
+  - telegram
+subscribes:
+  - mission.created
+  - content.published
+publishes:
+  - campaign.launched
+  - social.posted
+  - seo.audited
+roles:
+  - marketer
+  - copywriter
+  - analyst
