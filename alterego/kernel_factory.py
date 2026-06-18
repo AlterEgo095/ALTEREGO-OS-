@@ -86,6 +86,12 @@ def build_kernel(
     confidence = ConfidenceEngine(plugin_manager=pm, policy_engine=policy, memory=memory)
     learning = LearningEngine(memory=memory, event_bus=bus)
 
+    # 7.1 V1.3 — Initiative Engine + Digital Twin
+    from alterego.kernel.initiative_engine import InitiativeEngine
+    from alterego.kernel.digital_twin import DigitalTwin
+    initiative = InitiativeEngine(memory=memory, event_bus=bus, chief_of_staff=None, auto_create_missions=False)
+    digital_twin = DigitalTwin(memory=memory)
+
     # 7. Departments
     if departments_dir is None:
         # Default to the repo's departments/ directory
@@ -117,4 +123,7 @@ def build_kernel(
         "learning_engine": learning,
         "department_loader": dept_loader,
         "llm_plugin": llm_plugin,
+        "validation_pipeline": validation,
+        "initiative_engine": initiative,
+        "digital_twin": digital_twin,
     }

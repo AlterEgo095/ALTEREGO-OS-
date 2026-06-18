@@ -214,6 +214,70 @@ def engineer(
     console.print(Panel(report.summary(), title="Engineering Report", border_style="blue"))
 
 
+@app.command()
+def initiatives():
+    """Run initiative scan and show detected opportunities/anomalies."""
+    kernel = build_kernel()
+    engine = kernel["initiative_engine"]
+
+    async def _run():
+        found = await engine.scan()
+        if not found:
+            console.print("[green]No initiatives detected. System is healthy.[/green]")
+            return
+        table = Table(title=f"Initiatives detected ({len(found)})")
+        table.add_column("Type", style="cyan")
+        table.add_column("Priority", style="yellow")
+        table.add_column("Title", style="white")
+        table.add_column("Description", style="dim")
+        for init in found:
+            table.add_row(init.type.value, init.priority.value, init.title, init.description[:80])
+        console.print(table)
+
+    asyncio.run(_run())
+
+
+@app.command(name="twin")
+def digital_twin_cmd():
+    """Show your Digital Twin — what ALTEREGO knows about you."""
+    kernel = build_kernel()
+    twin = kernel["digital_twin"]
+
+    async def _show():
+        desc = await twin.describe()
+        console.print(Panel(desc, title="Digital Twin", border_style="magenta"))
+
+    asyncio.run(_show())
+
+
+@app.command()
+def register(
+    entity: str = typer.Argument(..., help="project | server | objective"),
+    name: str = typer.Argument(..., help="Name of the entity"),
+    host: str = typer.Option("", "--host", help="Host (for servers)"),
+):
+    """Register a project, server, or objective in your Digital Twin."""
+    kernel = build_kernel()
+    twin = kernel["digital_twin"]
+
+    async def _register():
+        if entity == "project":
+            await twin.register_project(name)
+        elif entity == "server":
+            if not host:
+                console.print("[red]--host is required for servers[/red]")
+                return
+            await twin.register_server(name, host)
+        elif entity == "objective":
+            await twin.set_objective(name)
+        else:
+            console.print(f"[red]Unknown entity: {entity}. Use project, server, or objective.[/red]")
+            return
+        console.print(f"[green]✓ {entity} '{name}' registered[/green]")
+
+    asyncio.run(_register())
+
+
 def main() -> None:
     app()
 

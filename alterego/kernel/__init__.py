@@ -39,6 +39,8 @@ from alterego.kernel.confidence_engine import ConfidenceEngine
 from alterego.kernel.learning_engine import LearningEngine
 from alterego.kernel.departments import DepartmentLoader, DepartmentSpec
 from alterego.kernel.validation_pipeline import ValidationPipeline, ValidationResult
+from alterego.kernel.initiative_engine import InitiativeEngine, Initiative, InitiativeType, InitiativePriority
+from alterego.kernel.digital_twin import DigitalTwin
 
 __all__ = [
     # Base contracts
@@ -56,4 +58,7 @@ __all__ = [
     "DepartmentLoader", "DepartmentSpec",
     # V1.2 — validation pipeline
     "ValidationPipeline", "ValidationResult",
+    # V1.3 — initiative + digital twin
+    "InitiativeEngine", "Initiative", "InitiativeType", "InitiativePriority",
+    "DigitalTwin",
 ]
