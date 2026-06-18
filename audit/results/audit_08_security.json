@@ -58,15 +58,9 @@
     },
     {
       "test": "path_traversal_in_filesystem_plugin",
-      "v1_behavior": "filesystem plugin can read ANY path (no sandbox)",
-      "can_read_etc_passwd": true,
-      "passed": false,
-      "severity": "critical",
-      "v2_needed": [
-        "Configurable root directory (config/filesystem.root)",
-        "Reject paths that resolve outside the root (resolve + check prefix)",
-        "Per-mission scratch directory (missions can't escape their scratch)"
-      ]
+      "passed": true,
+      "behavior": "Sandbox blocked: path traversal blocked: '/etc/passwd' resolves to /etc/passwd which is outside sandbox root /tmp/tmpa277jz58",
+      "v1_1_mitigation": "ALTEREGO_FS_ROOT env var enforces sandbox; path traversal raises PermissionError"
     },
     {
       "test": "path_traversal_with_dotdot",
@@ -126,12 +120,6 @@
       ]
     }
   ],
-  "issues": [
-    {
-      "severity": "critical",
-      "test": "test_path_traversal_in_filesystem_plugin",
-      "message": "{'test': 'path_traversal_in_filesystem_plugin', 'v1_behavior': 'filesystem plugin can read ANY path (no sandbox)', 'can_read_etc_passwd': True, 'passed': False, 'severity': 'critical', 'v2_needed': ['Configurable root directory (config/filesystem.root)', 'Reject paths that resolve outside the root (resolve + check prefix)', \"Per-mission scratch directory (missions can't escape their scratch)\"]}"
-    }
-  ],
-  "score": 75
+  "issues": [],
+  "score": 100
 }

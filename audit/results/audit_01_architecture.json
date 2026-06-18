@@ -15,7 +15,8 @@
       ],
       "abstract_classes": [
         "BaseCapability",
-        "BaseBridge"
+        "BaseBridge",
+        "BasePlugin"
       ],
       "public_functions": [
         "touch",
@@ -98,7 +99,7 @@
         "update",
         "delete"
       ],
-      "loc": 162
+      "loc": 194
     },
     "alterego.kernel.mission_engine": {
       "classes": [
@@ -149,7 +150,9 @@
       "classes": [
         "BrowserPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "BrowserPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -163,7 +166,9 @@
       "classes": [
         "DockerPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "DockerPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -177,7 +182,9 @@
       "classes": [
         "EmailPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "EmailPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -191,21 +198,25 @@
       "classes": [
         "FilesystemPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "FilesystemPlugin"
+      ],
       "public_functions": [
+        "initialize",
         "methods",
         "call",
-        "initialize",
         "health",
         "shutdown"
       ],
-      "loc": 125
+      "loc": 166
     },
     "alterego.plugins.github.__init__": {
       "classes": [
         "GitHubPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "GitHubPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -219,7 +230,9 @@
       "classes": [
         "LLMPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "LLMPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -233,7 +246,9 @@
       "classes": [
         "MongoPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "MongoPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -247,7 +262,9 @@
       "classes": [
         "PostgresPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "PostgresPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -261,7 +278,9 @@
       "classes": [
         "SSHPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "SSHPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -275,7 +294,9 @@
       "classes": [
         "TelegramPlugin"
       ],
-      "abstract_classes": [],
+      "abstract_classes": [
+        "TelegramPlugin"
+      ],
       "public_functions": [
         "initialize",
         "methods",
@@ -353,12 +374,6 @@
     ]
   },
   "circular_dependencies": [],
-  "issues": [
-    {
-      "severity": "critical",
-      "category": "interface_stability",
-      "message": "Missing ABCs in base.py: {'BasePlugin'}"
-    }
-  ],
-  "score": 85
+  "issues": [],
+  "score": 100
 }

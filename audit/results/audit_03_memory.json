@@ -4,7 +4,7 @@
     {
       "test": "persistence_after_restart",
       "passed": true,
-      "record_id": "91b207e4-e02a-4d92-a517-860316c47e7c"
+      "record_id": "cf670570-bac7-4568-9746-fe45522d1f49"
     },
     {
       "test": "context_recovery",
@@ -29,13 +29,13 @@
     },
     {
       "test": "database_corruption_recovery",
-      "behavior": "Crashed as expected: DatabaseError: file is not a database",
-      "passed": false,
-      "recommendation": "V2: add try/except in SQLiteMemory._init_db to auto-backup-and-recreate on corruption"
+      "behavior": "SQLite auto-recovered (re-created schema)",
+      "passed": true,
+      "records_after_recovery": 1
     },
     {
       "test": "load_10000_records",
-      "elapsed_sec": 1.86,
+      "elapsed_sec": 1.49,
       "total_records": 10000,
       "records_per_entity": {
         "projects": 1000,
@@ -77,11 +77,6 @@
   ],
   "issues": [
     {
-      "severity": "critical",
-      "test": "test_database_corruption_recovery",
-      "message": "{'test': 'database_corruption_recovery', 'behavior': 'Crashed as expected: DatabaseError: file is not a database', 'passed': False, 'recommendation': 'V2: add try/except in SQLiteMemory._init_db to auto-backup-and-recreate on corruption'}"
-    },
-    {
       "severity": "warning",
       "category": "scalability",
       "message": "SQLiteMemory.put uses synchronous sqlite3 (blocks event loop). V2: switch to aiosqlite for true async."
@@ -92,5 +87,5 @@
       "message": "No automatic corruption recovery. V2: wrap _init_db in try/except, backup-and-recreate on corruption."
     }
   ],
-  "score": 82
+  "score": 94
 }

@@ -65,7 +65,40 @@ class SQLiteMemory(Memory):
         self._init_db()
 
     def _init_db(self) -> None:
+        """Initialize the SQLite database with corruption recovery.
+
+        If the DB file is corrupted (e.g. binary garbage), SQLite will raise
+        DatabaseError. We catch it, backup the corrupted file, and recreate
+        a fresh schema — losing the data but keeping the system running.
+        """
+        try:
+            self._try_open_or_create()
+        except sqlite3.DatabaseError as e:
+            logger.warning(f"memory DB appears corrupted ({e}); backing up and recreating")
+            backup_path = self.db_path.with_suffix(f".corrupted.{int(datetime.utcnow().timestamp())}.db")
+            try:
+                self.db_path.rename(backup_path)
+                logger.info(f"corrupted DB backed up to {backup_path}")
+            except OSError as rename_err:
+                logger.error(f"could not backup corrupted DB: {rename_err}")
+                # As a last resort, delete it
+                try:
+                    self.db_path.unlink()
+                except OSError:
+                    pass
+            # Recreate fresh
+            self._try_open_or_create()
+            logger.info("memory DB recreated with fresh schema")
+        logger.debug(f"memory initialized at {self.db_path}")
+
+    def _try_open_or_create(self) -> None:
+        """Open the DB and ensure schema exists. Raises sqlite3.DatabaseError on corruption."""
         with sqlite3.connect(self.db_path) as conn:
+            # Quick integrity check
+            try:
+                conn.execute("SELECT 1 FROM sqlite_master LIMIT 1")
+            except sqlite3.DatabaseError:
+                raise  # let _init_db handle it
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS memory (
                     id TEXT PRIMARY KEY,
@@ -79,7 +112,6 @@ class SQLiteMemory(Memory):
                 "CREATE INDEX IF NOT EXISTS idx_entity ON memory(entity_type)"
             )
             conn.commit()
-        logger.debug(f"memory initialized at {self.db_path}")
 
     async def put(self, entity_type: str, data: dict[str, Any], id: Optional[str] = None) -> str:
         if entity_type not in ENTITY_TYPES:

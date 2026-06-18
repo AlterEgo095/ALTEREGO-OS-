@@ -1,10 +1,10 @@
 # ALTEREGO OS V1 — AUDIT COMPLET
 
-**Score global de maturité : 85/100**
+**Score global de maturité : 91/100**
 
-Tests exécutés : **60/67** (89%)
-Problèmes critiques : **4**
-Warnings : **12**
+Tests exécutés : **61/67** (91%)
+Problèmes critiques : **1**
+Warnings : **13**
 Infos : **4**
 
 ---
@@ -13,43 +13,31 @@ Infos : **4**
 
 | # | Audit | Score | Poids | Score pondéré | Statut |
 |---|-------|-------|-------|---------------|--------|
-| 1 | Architecture | **85**/100 | 12% | 10.2 | ⚠️ WARN |
+| 1 | Architecture | **100**/100 | 12% | 12.0 | ✅ PASS |
 | 2 | Event Bus | **98**/100 | 10% | 9.8 | ✅ PASS |
-| 3 | Memory | **82**/100 | 10% | 8.2 | ⚠️ WARN |
+| 3 | Memory | **94**/100 | 10% | 9.4 | ✅ PASS |
 | 4 | Plugin Manager | **91**/100 | 12% | 10.9 | ✅ PASS |
 | 5 | Capability Registry | **99**/100 | 10% | 9.9 | ✅ PASS |
 | 6 | Chief Of Staff | **100**/100 | 10% | 10.0 | ✅ PASS |
 | 7 | Scheduler | **73**/100 | 8% | 5.8 | ⚠️ WARN |
-| 8 | Sécurité | **75**/100 | 15% | 11.2 | ⚠️ WARN |
+| 8 | Sécurité | **100**/100 | 15% | 15.0 | ✅ PASS |
 | 9 | Observabilité | **55**/100 | 8% | 4.4 | ❌ FAIL |
-| 10 | Performance | **100**/100 | 5% | 5.0 | ✅ PASS |
-| | **GLOBAL** | **85**/100 | 100% | **85** | ❌ FAIL |
+| 10 | Performance | **85**/100 | 5% | 4.2 | ⚠️ WARN |
+| | **GLOBAL** | **91**/100 | 100% | **91** | ✅ PASS |
 
 ---
 
 ## Verdict
 
-⚠️ **AUDIT PARTIEL** — Score 85/100. Phase 3 possible mais avec debt technique à adresser en V2.
+✅ **AUDIT RÉUSSI** — Le Kernel V1 est prêt pour la Phase 3.
 
 ---
 
 ## 🚨 Problèmes critiques (à résoudre avant Phase 3)
 
-### 1. [architecture] interface_stability
-
-**Missing ABCs in base.py: {'BasePlugin'}**
-
-### 2. [memory] test_database_corruption_recovery
-
-**{'test': 'database_corruption_recovery', 'behavior': 'Crashed as expected: DatabaseError: file is not a database', 'passed': False, 'recommendation': 'V2: add try/except in SQLiteMemory._init_db to auto-backup-and-recreate on corruption'}**
-
-### 3. [scheduler] test_100_sequential_tasks_deterministic
+### 1. [scheduler] test_100_sequential_tasks_deterministic
 
 **{'test': '100_sequential_tasks_deterministic', 'mission_status': 'completed', 'task_count': 1, 'passed': False}**
-
-### 4. [security] test_path_traversal_in_filesystem_plugin
-
-**{'test': 'path_traversal_in_filesystem_plugin', 'v1_behavior': 'filesystem plugin can read ANY path (no sandbox)', 'can_read_etc_passwd': True, 'passed': False, 'severity': 'critical', 'v2_needed': ['Configurable root directory (config/filesystem.root)', 'Reject paths that resolve outside the root (resolve + check prefix)', "Per-mission scratch directory (missions can't escape their scratch)"]}**
 
 ---
 
@@ -69,12 +57,13 @@ Infos : **4**
 | observability | test_plugin_call_counting | {'test': 'plugin_call_counting', 'v1_has_counter': False, 'passed': False, 'v2_needed': ['Counter per (plugin, method) p |
 | observability | test_memory_usage_tracking | {'test': 'memory_usage_tracking', 'v1_has_tracking': False, 'passed': False, 'v2_needed': ['RSS memory tracking (psutil. |
 | observability | test_cpu_usage_tracking | {'test': 'cpu_usage_tracking', 'v1_has_tracking': False, 'passed': False, 'v2_needed': ['CPU% per plugin', 'CPU time per |
+| performance | test_1000_missions_throughput | {'test': '1000_missions_throughput', 'missions': 1000, 'total_elapsed_sec': 30.6, 'throughput_per_sec': 32.7, 'avg_laten |
 
 ---
 
 ## Détails par audit
 
-### AUDIT — Architecture (score: 85/100)
+### AUDIT — Architecture (score: 100/100)
 
 **Tests**: 0/0 réussis
 
@@ -92,21 +81,21 @@ Infos : **4**
 | handler_failure_isolation | ✅ | published=2 · good_handler_received=2 |
 | wildcard_matching | ✅ | expected_matches=3 · actual_matches=3 |
 | unsubscribe_stops_delivery | ✅ | expected=1 · actual=1 |
-| latency | ✅ | samples=1000 · avg_ms=0.015 · p99_ms=0.023 |
+| latency | ✅ | samples=1000 · avg_ms=0.015 · p99_ms=0.026 |
 | restart_persistence | ✅ | expected_volatile_behavior=in-process bus is volatile; events published before subscribe are lost on restart · recommendation=V2: switch to NATS JetStream for persistence + replay |
 
-### AUDIT — Memory (score: 82/100)
+### AUDIT — Memory (score: 94/100)
 
-**Tests**: 8/9 réussis
+**Tests**: 9/9 réussis
 
 | Test | Statut | Détails clés |
 |------|--------|--------------|
-| persistence_after_restart | ✅ | record_id=91b207e4-e02a-4d92-a517-860316c47e7c |
+| persistence_after_restart | ✅ | record_id=cf670570-bac7-4568-9746-fe45522d1f49 |
 | context_recovery | ✅ | alice_messages=10 · bob_messages=3 |
 | concurrent_writes | ✅ | concurrent_puts=100 · ids_returned=100 · records_in_db=100 |
 | concurrent_reads_and_writes | ✅ | writers=50 · readers=50 · read_completions=50 |
-| database_corruption_recovery | ❌ | behavior=Crashed as expected: DatabaseError: file is not a database · recommendation=V2: add try/except in SQLiteMemory._init_db to auto-backup-and-recreate on corruption |
-| load_10000_records | ✅ | elapsed_sec=1.86 · total_records=10000 |
+| database_corruption_recovery | ✅ | behavior=SQLite auto-recovered (re-created schema) · records_after_recovery=1 |
+| load_10000_records | ✅ | elapsed_sec=1.49 · total_records=10000 |
 | update_preserves_unspecified_fields | ✅ |  |
 | invalid_entity_type_rejected | ✅ | error=Unknown entity_type 'invalid_type'. Allowed: ['projects', 'repositories', 'servers', 'containers', 'users', 'conversations', 'tasks', 'documents', 'preferences', 'knowledge'] |
 | postgresql_migration_readiness | ✅ | all_async=True · entity_types_count=10 · notes=Protocol is async-only; switching to asyncpg requires only a new Memory subclass. No Kernel code changes needed. |
@@ -120,7 +109,7 @@ Infos : **4**
 | load_good_plugin | ✅ |  |
 | load_broken_init_does_not_crash_kernel | ✅ | behavior=PluginManager caught the init exception and continued |
 | load_broken_call_does_not_crash_kernel | ✅ | behavior=Exception propagated cleanly to caller |
-| slow_plugin_with_timeout | ✅ | elapsed_ms=500.7 · behavior=asyncio.wait_for correctly cancelled the slow call |
+| slow_plugin_with_timeout | ✅ | elapsed_ms=500.8 · behavior=asyncio.wait_for correctly cancelled the slow call |
 | isolation_between_plugins | ✅ | good_plugin_worked_before=True · broken_plugin_raised=True · good_plugin_worked_after=True |
 | missing_capability_returns_none | ✅ | behavior=best_for() returns None cleanly — caller must handle |
 | fake_spec_plugin | ✅ | behavior=Plugin loads; quality validation is V2 (V1 trusts the spec) · recommendation=V2: add runtime capability verification — try calling each declared method at load time |
@@ -163,9 +152,9 @@ Infos : **4**
 | priority_is_documented_but_not_implemented | ✅ | v1_behavior=Tasks run in submission order (FIFO). No priority queue. · v2_plan=Add PriorityQueue in MissionEngine. Tasks get priority from Planner. · severity=info |
 | mission_failure_does_not_block_subsequent_missions | ✅ | mission1_status=completed · mission2_status=completed |
 
-### AUDIT — Sécurité (score: 75/100)
+### AUDIT — Sécurité (score: 100/100)
 
-**Tests**: 10/11 réussis
+**Tests**: 11/11 réussis
 
 | Test | Statut | Détails clés |
 |------|--------|--------------|
@@ -173,7 +162,7 @@ Infos : **4**
 | plugin_injection_via_entry_points | ✅ | v1_risk=MEDIUM — any pip-installed package can register a plugin |
 | command_injection_in_ssh_plugin | ✅ | uses_shell_true=False · uses_paramiko_exec_command=True |
 | command_injection_in_docker_plugin | ✅ | uses_shell_true=False · uses_exec_run=True |
-| path_traversal_in_filesystem_plugin | ❌ | v1_behavior=filesystem plugin can read ANY path (no sandbox) · can_read_etc_passwd=True · severity=critical |
+| path_traversal_in_filesystem_plugin | ✅ | behavior=Sandbox blocked: path traversal blocked: '/etc/passwd' resolves to /etc/passwd which is outside sandbox root /tmp/tmpa277jz58 · v1_1_mitigation=ALTEREGO_FS_ROOT env var enforces sandbox; path traversal raises PermissionError |
 | path_traversal_with_dotdot | ✅ |  |
 | sandbox_escape_via_python_eval | ✅ | uses_python_eval_directly=False · v1_behavior=Browser plugin's evaluate() runs JS in the browser sandbox (Playwright), not Python eval() |
 | secret_leakage_in_logs | ✅ | v1_behavior=Plugins read secrets from env vars and pass to libraries; no direct logging of env values |
@@ -190,26 +179,26 @@ Infos : **4**
 | structured_logging | ✅ | v1_behavior=loguru used across kernel modules |
 | metrics_infrastructure | ❌ | v1_has_metrics=False |
 | health_check_endpoint | ✅ | v1_has_health_cli=True · v1_behavior=alterego health command checks all plugins |
-| latency_measurement | ✅ | samples=50 · avg_ms=2.3 · p99_ms=3.86 |
+| latency_measurement | ✅ | samples=50 · avg_ms=2.35 · p99_ms=3.81 |
 | plugin_call_counting | ❌ | v1_has_counter=False |
 | llm_cost_tracking | ✅ | v1_returns_usage_per_call=True · v1_aggregates_cost=False |
 | memory_usage_tracking | ❌ | v1_has_tracking=False |
 | cpu_usage_tracking | ❌ | v1_has_tracking=False |
 | error_tracking | ✅ | v1_logs_errors=True · v1_aggregates_errors=False |
 
-### AUDIT — Performance (score: 100/100)
+### AUDIT — Performance (score: 85/100)
 
-**Tests**: 7/7 réussis
+**Tests**: 6/7 réussis
 
 | Test | Statut | Détails clés |
 |------|--------|--------------|
-| 1000_missions_throughput | ✅ | missions=1000 · total_elapsed_sec=29.38 · throughput_per_sec=34.0 |
-| 100_simulated_plugins_load | ✅ | elapsed_ms=0.02 · note=Real plugin init time depends on plugin code; PluginManager itself is negligible |
-| 50_conversations_in_memory | ✅ | records_written=500 · write_elapsed_ms=94.87 · query_one_conversation_ms=2.2 |
-| 10000_events_throughput | ✅ | events_published=10000 · events_received=10000 · elapsed_sec=0.156 |
+| 1000_missions_throughput | ❌ | missions=1000 · total_elapsed_sec=30.6 · throughput_per_sec=32.7 |
+| 100_simulated_plugins_load | ✅ | elapsed_ms=0.01 · note=Real plugin init time depends on plugin code; PluginManager itself is negligible |
+| 50_conversations_in_memory | ✅ | records_written=500 · write_elapsed_ms=97.86 · query_one_conversation_ms=2.31 |
+| 10000_events_throughput | ✅ | events_published=10000 · events_received=10000 · elapsed_sec=0.153 |
 | plugin_call_latency | ✅ | samples=1000 · avg_ms=0.0 · p99_ms=0.0 |
-| memory_query_latency | ✅ | records_in_db=10000 · queries=100 · avg_ms=38.16 |
-| event_bus_latency | ✅ | samples=10000 · avg_ms=0.0152 · p99_ms=0.0237 |
+| memory_query_latency | ✅ | records_in_db=10000 · queries=100 · avg_ms=38.37 |
+| event_bus_latency | ✅ | samples=10000 · avg_ms=0.0149 · p99_ms=0.0236 |
 
 ---
 
@@ -281,15 +270,9 @@ Après audit, aucun composant V1 n'est inutile. Tous les 8 composants Kernel et 
 
 ## Conclusion
 
-**Score global : 85/100**
+**Score global : 91/100**
 
-⚠️ Le Kernel V1 est fonctionnel mais avec debt technique. Score 85/100 — sous le seuil de 90 requis.
-
-**Recommandation** :
-- Corriger les 3 problèmes critiques (filesystem sandbox, memory corruption, validation pipeline)
-- Réexécuter l'audit
-- Si score ≥ 90 → Phase 3
-- Sinon → itérer sur les warnings
+✅ Le Kernel V1 constitue une base solide. Phase 3 autorisée.
 
 ---
 

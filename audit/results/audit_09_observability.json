@@ -44,10 +44,10 @@
     {
       "test": "latency_measurement",
       "samples": 50,
-      "avg_ms": 2.3,
-      "p99_ms": 3.86,
-      "min_ms": 1.79,
-      "max_ms": 3.86,
+      "avg_ms": 2.35,
+      "p99_ms": 3.81,
+      "min_ms": 1.83,
+      "max_ms": 3.81,
       "passed": true,
       "v2_needed": [
         "Per-stage latency tracking (CoS\u2192Engine\u2192Planner\u2192Plugin\u2192Response)",

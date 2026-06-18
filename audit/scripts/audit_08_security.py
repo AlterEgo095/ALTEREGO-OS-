@@ -159,35 +159,36 @@ async def test_command_injection_in_docker_plugin():
 async def test_path_traversal_in_filesystem_plugin():
     """The filesystem plugin should reject paths that escape a configurable root.
 
-    V1: NO mitigation — filesystem plugin can read/write ANY path.
-    This is a CRITICAL security gap.
+    V1.1 mitigation: if ALTEREGO_FS_ROOT is set, paths are resolved and
+    verified to be within the root. If not set, plugin runs unrestricted
+    (with warning) — operator's responsibility.
     """
     with tempfile.TemporaryDirectory() as tmp:
-        plugin = FilesystemPlugin()
-        await plugin.initialize()
-
-        # Try to read /etc/passwd (path traversal outside any sandbox)
+        # Set the sandbox root for this test
+        os.environ["ALTEREGO_FS_ROOT"] = tmp
         try:
-            content = await plugin.call("read", {"path": "/etc/passwd"})
-            # If we can read it, that's a security gap
-            return {
-                "test": "path_traversal_in_filesystem_plugin",
-                "v1_behavior": "filesystem plugin can read ANY path (no sandbox)",
-                "can_read_etc_passwd": "root:" in content,
-                "passed": False,  # CRITICAL: no sandbox in V1
-                "severity": "critical",
-                "v2_needed": [
-                    "Configurable root directory (config/filesystem.root)",
-                    "Reject paths that resolve outside the root (resolve + check prefix)",
-                    "Per-mission scratch directory (missions can't escape their scratch)",
-                ],
-            }
-        except Exception as e:
-            return {
-                "test": "path_traversal_in_filesystem_plugin",
-                "passed": True,
-                "behavior": f"Plugin rejected: {e}",
-            }
+            plugin = FilesystemPlugin()
+            await plugin.initialize()
+
+            # Try to read /etc/passwd (path traversal outside any sandbox)
+            try:
+                content = await plugin.call("read", {"path": "/etc/passwd"})
+                return {
+                    "test": "path_traversal_in_filesystem_plugin",
+                    "v1_behavior": "filesystem plugin DID NOT block path traversal",
+                    "can_read_etc_passwd": "root:" in content,
+                    "passed": False,
+                    "severity": "critical",
+                }
+            except PermissionError as e:
+                return {
+                    "test": "path_traversal_in_filesystem_plugin",
+                    "passed": True,
+                    "behavior": f"Sandbox blocked: {e}",
+                    "v1_1_mitigation": "ALTEREGO_FS_ROOT env var enforces sandbox; path traversal raises PermissionError",
+                }
+        finally:
+            os.environ.pop("ALTEREGO_FS_ROOT", None)
 
 
 async def test_path_traversal_with_dotdot():

@@ -40,10 +40,12 @@ class MockLLM(BasePlugin):
     def methods(self): return ["chat"]
     async def call(self, method, params):
         system = params.get("system", "")
+        user = params.get("user", "")
         if "Available capabilities" in system:
             # Plan with N tasks (parametrizable via the objective)
+            # Look for "N tasks" pattern anywhere in the (possibly enriched) user message
             import re
-            m = re.search(r"(\d+) tasks", params.get("user", ""))
+            m = re.search(r"(\d+)\s+tasks", user)
             n = int(m.group(1)) if m else 1
             tasks = []
             for i in range(n):

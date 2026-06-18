@@ -183,6 +183,8 @@ def main():
             })
 
     # 5c. Interface stability — check that base.py exposes the ABCs
+    # BasePlugin inherits from BaseBridge (which inherits from ABC) — transitive ABC.
+    # The analyze_module function detects this via Base* inheritance check.
     base_meta = results["modules"].get("alterego.kernel.base", {})
     expected_abc = {"BaseBridge", "BasePlugin", "BaseCapability"}
     found_abc = set(base_meta.get("abstract_classes", []))

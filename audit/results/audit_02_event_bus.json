@@ -40,7 +40,7 @@
       "test": "latency",
       "samples": 1000,
       "avg_ms": 0.015,
-      "p99_ms": 0.023,
+      "p99_ms": 0.026,
       "passed": true
     },
     {
