@@ -41,6 +41,9 @@ from alterego.kernel.departments import DepartmentLoader, DepartmentSpec
 from alterego.kernel.validation_pipeline import ValidationPipeline, ValidationResult
 from alterego.kernel.initiative_engine import InitiativeEngine, Initiative, InitiativeType, InitiativePriority
 from alterego.kernel.digital_twin import DigitalTwin
+from alterego.kernel.goal_engine import GoalEngine, Goal, Objective, GoalStatus
+from alterego.kernel.daily_assistant import DailyAssistant
+from alterego.kernel.context_engine import ContextEngine
 
 __all__ = [
     # Base contracts
@@ -61,4 +64,7 @@ __all__ = [
     # V1.3 — initiative + digital twin
     "InitiativeEngine", "Initiative", "InitiativeType", "InitiativePriority",
     "DigitalTwin",
+    # V2 — goal engine + daily assistant + context
+    "GoalEngine", "Goal", "Objective", "GoalStatus",
+    "DailyAssistant", "ContextEngine",
 ]

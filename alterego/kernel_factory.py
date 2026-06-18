@@ -92,6 +92,14 @@ def build_kernel(
     initiative = InitiativeEngine(memory=memory, event_bus=bus, chief_of_staff=None, auto_create_missions=False)
     digital_twin = DigitalTwin(memory=memory)
 
+    # 7.2 V2 — Goal Engine + Daily Assistant + Context Engine
+    from alterego.kernel.goal_engine import GoalEngine
+    from alterego.kernel.daily_assistant import DailyAssistant
+    from alterego.kernel.context_engine import ContextEngine
+    goal_engine = GoalEngine(memory=memory, llm_plugin=llm_plugin)
+    daily = DailyAssistant(memory=memory, goal_engine=goal_engine, initiative_engine=initiative, llm_plugin=llm_plugin)
+    context = ContextEngine(memory=memory, digital_twin=digital_twin, goal_engine=goal_engine)
+
     # 7. Departments
     if departments_dir is None:
         # Default to the repo's departments/ directory
@@ -126,4 +134,7 @@ def build_kernel(
         "validation_pipeline": validation,
         "initiative_engine": initiative,
         "digital_twin": digital_twin,
+        "goal_engine": goal_engine,
+        "daily_assistant": daily,
+        "context_engine": context,
     }

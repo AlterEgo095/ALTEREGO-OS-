@@ -278,6 +278,109 @@ def register(
     asyncio.run(_register())
 
 
+@app.command()
+def goal(
+    action: str = typer.Argument(..., help="create | list | progress | complete"),
+    title: str = typer.Argument("", help="Goal title (for create) or goal ID (for progress/complete)"),
+    description: str = typer.Option("", "--desc", "-d", help="Goal description"),
+    priority: int = typer.Option(50, "--priority", "-p", help="Priority 0-100"),
+):
+    """Manage persistent goals."""
+    kernel = build_kernel()
+    engine = kernel["goal_engine"]
+
+    async def _run():
+        if action == "create":
+            if not title:
+                console.print("[red]Goal title required[/red]")
+                return
+            await kernel["plugin_manager"].initialize_all()
+            g = await engine.create_goal(title, description, priority)
+            console.print(Panel(g.summary(), title=f"Goal Created: {g.id[:8]}", border_style="green"))
+        elif action == "list":
+            goals = await engine.list_goals()
+            if not goals:
+                console.print("[yellow]No goals registered. Use 'alterego goal create \"My Goal\"'[/yellow]")
+                return
+            table = Table(title=f"Goals ({len(goals)})")
+            table.add_column("ID", style="dim")
+            table.add_column("Title", style="cyan")
+            table.add_column("Status", style="yellow")
+            table.add_column("Progress", style="green")
+            table.add_column("Priority", style="white")
+            for g in goals:
+                table.add_row(g.id[:8], g.title, g.status.value, f"{g.progress():.0%}", str(g.priority))
+            console.print(table)
+        elif action == "progress":
+            report = await engine.summary()
+            console.print(Panel(report, title="Goal Progress", border_style="blue"))
+        elif action == "complete":
+            if not title:
+                console.print("[red]Goal ID required[/red]")
+                return
+            await engine.update_goal(title, status="completed")
+            console.print(f"[green]✓ Goal {title} marked as completed[/green]")
+        else:
+            console.print(f"[red]Unknown action: {action}. Use create, list, progress, or complete.[/red]")
+
+    asyncio.run(_run())
+
+
+@app.command()
+def brief():
+    """Get the morning brief — what happened and what's planned."""
+    kernel = build_kernel()
+
+    async def _run():
+        await kernel["plugin_manager"].initialize_all()
+        daily = kernel["daily_assistant"]
+        report = await daily.morning_brief()
+        console.print(Panel(report, title="🌅 Morning Brief", border_style="yellow"))
+
+    asyncio.run(_run())
+
+
+@app.command()
+def evening():
+    """Get the evening report — what was accomplished today."""
+    kernel = build_kernel()
+
+    async def _run():
+        await kernel["plugin_manager"].initialize_all()
+        daily = kernel["daily_assistant"]
+        report = await daily.evening_report()
+        console.print(Panel(report, title="🌙 Evening Report", border_style="blue"))
+
+    asyncio.run(_run())
+
+
+@app.command()
+def weekly():
+    """Get the weekly review — progress and trends."""
+    kernel = build_kernel()
+
+    async def _run():
+        await kernel["plugin_manager"].initialize_all()
+        daily = kernel["daily_assistant"]
+        report = await daily.weekly_review()
+        console.print(Panel(report, title="📅 Weekly Review", border_style="magenta"))
+
+    asyncio.run(_run)
+
+
+@app.command()
+def context():
+    """Show the current context — what ALTEREGO knows about your current state."""
+    kernel = build_kernel()
+
+    async def _run():
+        ctx_engine = kernel["context_engine"]
+        summary = await ctx_engine.get_context_summary()
+        console.print(Panel(summary, title="🧠 Current Context", border_style="cyan"))
+
+    asyncio.run(_run)
+
+
 def main() -> None:
     app()
 

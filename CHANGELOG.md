@@ -1,5 +1,44 @@
 # CHANGELOG — ALTEREGO OS
 
+## V2.0 (2026-06-18) — ALTEREGO devient un collaborateur vivant
+
+### Added
+- **Goal Engine** (Étape 1) — l'utilisateur exprime des objectifs, pas des tâches
+  - Goal → Objectives → Projects → Missions → Tasks → Capabilities → Plugins → Execution → Validation → Learning → Memory
+  - Décomposition automatique par LLM (2-5 objectifs par goal)
+  - Suivi persistant (status: active/paused/completed/abandoned)
+  - Progression mesurée (fraction d'objectifs complétés)
+  - CLI: `alterego goal create "Mon objectif"`, `alterego goal list`, `alterego goal progress`
+
+- **Daily Assistant** (Étape 2) — rapports automatiques
+  - Morning Brief (activité récente, objectifs actifs, initiatives en attente)
+  - Evening Report (missions du jour, réussites/échecs, progrès objectifs)
+  - Weekly Review (stats hebdomadaires, taux de succès, tendances)
+  - Progress Report (rapport détaillé sur un objectif)
+  - CLI: `alterego brief`, `alterego evening`, `alterego weekly`
+
+- **Context Engine** (Étape 3) — contexte permanent
+  - Active goals, active project, active server
+  - Recent conversations (continuité)
+  - User preferences
+  - Known projects and servers
+  - Recent missions
+  - `get_context_summary()` injecté dans le Decision Engine
+  - CLI: `alterego context`
+
+### Changed
+- Kernel `__init__.py` expose désormais **18 composants** (15 + GoalEngine + DailyAssistant + ContextEngine)
+- `kernel_factory.py` câble les 3 nouveaux engines
+- CLI: 5 nouvelles commandes (`goal`, `brief`, `evening`, `weekly`, `context`)
+
+### Components count
+- **18 Kernel components**
+- **11 Departments**
+- **10 Plugins**
+- **75 tests unitaires**
+
+---
+
 ## V1.3 (2026-06-18) — Initiative Engine + Digital Twin
 
 ### Added
