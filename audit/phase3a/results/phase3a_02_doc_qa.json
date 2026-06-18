@@ -1,0 +1,16 @@
+{
+  "scenario": "3A.2 \u2014 Document Q&A",
+  "passed": true,
+  "criteria": {
+    "mission1_completed": true,
+    "mission2_completed": true,
+    "mission3_completed": true,
+    "confidence_displayed": true,
+    "context_persisted": true,
+    "learning_captured": true,
+    "no_architecture_leak": true
+  },
+  "missions_count": 3,
+  "conversations_count": 6,
+  "knowledge_records": 3
+}

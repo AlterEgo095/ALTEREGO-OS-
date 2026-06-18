@@ -1,0 +1,16 @@
+{
+  "scenario": "3A.1 \u2014 VPS Audit",
+  "passed": true,
+  "criteria": {
+    "mission_completed": true,
+    "confidence_score_displayed": true,
+    "policy_checked": true,
+    "learning_captured": true,
+    "memory_persisted": true,
+    "no_architecture_leak": true,
+    "conversational": true
+  },
+  "elapsed_ms": 3.9,
+  "response_length": 168,
+  "knowledge_records": 1
+}

@@ -1,0 +1,13 @@
+{
+  "scenario": "3A.3 \u2014 Web Research",
+  "passed": false,
+  "criteria": {
+    "mission_completed": true,
+    "confidence_displayed": true,
+    "browser_used": false,
+    "policy_allows_browser": true,
+    "learning_captured": true,
+    "no_architecture_leak": true
+  },
+  "elapsed_ms": 3.8
+}

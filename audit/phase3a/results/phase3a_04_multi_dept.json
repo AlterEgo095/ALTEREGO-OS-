@@ -1,0 +1,23 @@
+{
+  "scenario": "3A.4 \u2014 Multi-department Orchestration",
+  "passed": false,
+  "criteria": {
+    "mission_completed": true,
+    "confidence_displayed": true,
+    "multiple_departments": true,
+    "multiple_capabilities": false,
+    "learning_captured": true,
+    "no_architecture_leak": true,
+    "conversational": true
+  },
+  "departments_involved": [
+    "research",
+    "personal",
+    "infrastructure",
+    "engineering"
+  ],
+  "capabilities_used": [
+    "llm.chat"
+  ],
+  "elapsed_ms": 4.0
+}
